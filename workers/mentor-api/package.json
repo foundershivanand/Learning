@@ -9,14 +9,15 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@personal-mentor/shared": "workspace:*",
-    "@personal-mentor/skills": "workspace:*",
+    "@libsql/client": "^0.18.0",
+    "@personal-mentor/ai-router": "workspace:*",
     "@personal-mentor/core": "workspace:*",
-    "@personal-mentor/ai-router": "workspace:*"
+    "@personal-mentor/shared": "workspace:*",
+    "@personal-mentor/skills": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^22.13.4",
     "typescript": "^5.7.3",
-    "wrangler": "^3.109.2",
-    "@types/node": "^22.13.4"
+    "wrangler": "^3.109.2"
   }
 }

@@ -10,14 +10,15 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^15.1.7",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "lucide-react": "^0.475.0",
+    "@libsql/client": "^0.18.0",
+    "@personal-mentor/ai-router": "workspace:*",
+    "@personal-mentor/core": "workspace:*",
     "@personal-mentor/shared": "workspace:*",
     "@personal-mentor/skills": "workspace:*",
-    "@personal-mentor/core": "workspace:*",
-    "@personal-mentor/ai-router": "workspace:*"
+    "lucide-react": "^0.475.0",
+    "next": "^15.1.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",

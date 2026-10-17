@@ -3,15 +3,6 @@ main = "src/index.ts"
 compatibility_date = "2024-04-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Cloudflare R2 Media Bucket
-[[r2_buckets]]
-binding = "MEDIA_BUCKET"
-bucket_name = "mentor-media"
-
-# Cloudflare Workers AI Binding
-[ai]
-binding = "AI"
-
 # Daily 06:00 AM Cron Trigger (UTC 00:30 = 06:00 AM IST)
 [triggers]
 crons = ["30 0 * * *"]
@@ -19,3 +10,6 @@ crons = ["30 0 * * *"]
 [vars]
 ENVIRONMENT = "production"
 DEFAULT_TIMEZONE = "Asia/Kolkata"
+TURSO_DATABASE_URL = "libsql://reusable-sh15a.aws-ap-south-1.turso.io"
+TURSO_AUTH_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODk4ODMzNDUsImlkIjoiMDFhMGJkNTUtNjYwMS03NDBkLWE0MWUtNWRhYzI5MTQ3Yjg4Iiwia2lkIjoiUEJVVXJDMUljTkFQVmc5WEwyNWlsa1Z1amVTUlFNM0Nqb202b0VvSHpNbyIsInJpZCI6ImNkZGFlYjNkLTY1ODctNDc0Mi04MGJiLWI0YjE2MmQ4NDE1MyJ9.PhzdD9vGWLNwwyS-ZH2VYP6Xh29OIvBXSDH6P_bfPID74DkcN_Gg1Zw_MN9DqWr5JgNcDN3hV26sZbnh7_APDw"
+GROQ_API_KEY = "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"

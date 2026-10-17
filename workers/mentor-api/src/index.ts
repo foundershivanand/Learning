@@ -3,7 +3,8 @@ import {
   SubmitAttemptRequest, 
   SubmitAttemptResponse,
   TelegramWebhookPayload,
-  Challenge
+  Challenge,
+  Attempt
 } from '@personal-mentor/shared';
 import { 
   AssessmentEngine, 
@@ -13,18 +14,20 @@ import {
   ChallengeEngine, 
   GamificationEngine,
   RealityModeEngine,
-  ContextEngine
+  RawAssessmentResult
 } from '@personal-mentor/core';
 import { AIRouter } from '@personal-mentor/ai-router';
 import { globalStore } from './store.js';
+import { TursoMentorStore } from './turso-store.js';
 
 export interface Env {
   AI?: any;
-  MEDIA_BUCKET?: any;
   TELEGRAM_BOT_TOKEN?: string;
   CLOUDFLARE_ACCOUNT_ID?: string;
   CLOUDFLARE_API_TOKEN?: string;
   GROQ_API_KEY?: string;
+  TURSO_DATABASE_URL?: string;
+  TURSO_AUTH_TOKEN?: string;
 }
 
 const CORS_HEADERS = {
@@ -50,8 +53,14 @@ export default {
   async scheduled(event: any, env: Env, ctx: any) {
     console.log('Cron triggered: Running 06:00 AM Mentor Daily Planner');
     const today = new Date().toISOString().split('T')[0];
-    const plan = globalStore.getDailyPlan(today);
-    console.log(`Daily plan created for ${today}, target: ${plan.targetMinutes} minutes`);
+    if (env.TURSO_DATABASE_URL) {
+      const store = new TursoMentorStore(env.TURSO_DATABASE_URL, env.TURSO_AUTH_TOKEN);
+      const plan = await store.getDailyPlan(today);
+      console.log(`Turso Daily plan verified for ${today}, target: ${plan.targetMinutes} minutes`);
+    } else {
+      const plan = globalStore.getDailyPlan(today);
+      console.log(`Daily plan created for ${today}, target: ${plan.targetMinutes} minutes`);
+    }
   },
 
   /**
@@ -66,12 +75,20 @@ export default {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
 
+    const turso = env.TURSO_DATABASE_URL ? new TursoMentorStore(env.TURSO_DATABASE_URL, env.TURSO_AUTH_TOKEN) : null;
+    const aiRouter = new AIRouter({
+      cloudflareAccountId: env.CLOUDFLARE_ACCOUNT_ID,
+      cloudflareApiToken: env.CLOUDFLARE_API_TOKEN,
+      groqApiKey: env.GROQ_API_KEY,
+    });
+
     try {
       // 1. Health Check
       if (path === '/api/health') {
         return jsonResponse({
           status: 'online',
           service: 'mentor-api',
+          database: turso ? 'turso-libsql' : 'in-memory',
           timestamp: new Date().toISOString(),
           version: '1.0.0',
         });
@@ -80,6 +97,30 @@ export default {
       // 2. Dashboard Today State
       if (path === '/api/today' && request.method === 'GET') {
         const todayStr = new Date().toISOString().split('T')[0];
+
+        if (turso) {
+          const profile = await turso.getProfile();
+          const dailyPlan = await turso.getDailyPlan(todayStr);
+          const debts = await turso.getDebts();
+          const debtSummary = TrainingDebtEngine.calculateSummary(debts);
+          const weaknesses = await turso.getWeaknesses();
+          const activeWeakness = weaknesses.find(w => w.status !== 'RESOLVED') || null;
+          const skillsOverview = await turso.getSkillsOverview();
+          const gamification = await turso.getGamification();
+
+          const response: TodayDashboardResponse = {
+            profile,
+            dailyPlan,
+            gamification,
+            activeChallenges: [],
+            trainingDebt: debtSummary,
+            primaryWeakness: activeWeakness,
+            weaknesses,
+            skillsOverview,
+          };
+          return jsonResponse(response);
+        }
+
         const dailyPlan = globalStore.getDailyPlan(todayStr);
         const debtSummary = TrainingDebtEngine.calculateSummary(globalStore.debts);
         const activeWeakness = globalStore.weaknesses.find(w => w.status !== 'RESOLVED') || null;
@@ -93,6 +134,7 @@ export default {
           activeChallenges,
           trainingDebt: debtSummary,
           primaryWeakness: activeWeakness,
+          weaknesses: globalStore.weaknesses,
           skillsOverview,
         };
 
@@ -101,14 +143,16 @@ export default {
 
       // 3. Generate Next Challenge
       if (path === '/api/challenge/next' && request.method === 'GET') {
-        const skills = globalStore.getSkillsOverview();
-        const debtSummary = TrainingDebtEngine.calculateSummary(globalStore.debts);
+        const skills = turso ? await turso.getSkillsOverview() : globalStore.getSkillsOverview();
+        const debts = turso ? await turso.getDebts() : globalStore.debts;
+        const weaknesses = turso ? await turso.getWeaknesses() : globalStore.weaknesses;
+        const debtSummary = TrainingDebtEngine.calculateSummary(debts);
         
         const target = ChallengeEngine.calculateTargetPriority({
           skills,
-          weaknesses: globalStore.weaknesses,
+          weaknesses,
           trainingDebtPoints: debtSummary.totalActiveDebtPoints,
-          recentAttemptsCount: globalStore.attempts.length,
+          recentAttemptsCount: 0,
         });
 
         // Generate challenge template
@@ -119,101 +163,179 @@ export default {
           target.targetWeakness
         );
 
-        globalStore.challenges.set(challenge.id, challenge);
+        if (turso) {
+          await turso.saveChallenge(challenge);
+        } else {
+          globalStore.challenges.set(challenge.id, challenge);
+        }
+
         return jsonResponse(challenge);
       }
 
       // 4. Submit Attempt & Evaluate
       if (path === '/api/challenge/submit' && request.method === 'POST') {
         const body: SubmitAttemptRequest = await request.json();
-        const challenge = globalStore.challenges.get(body.challengeId) || ChallengeEngine.generateTemplateChallenge('communication', 'comm_clarity', 65);
+        let challenge: Challenge | null = null;
+        if (turso) {
+          challenge = await turso.getChallenge(body.challengeId);
+        } else {
+          challenge = globalStore.challenges.get(body.challengeId) || null;
+        }
 
-        const aiRouter = new AIRouter({
-          cloudflareAccountId: env.CLOUDFLARE_ACCOUNT_ID,
-          cloudflareApiToken: env.CLOUDFLARE_API_TOKEN,
-          groqApiKey: env.GROQ_API_KEY,
-        });
+        if (!challenge) {
+          challenge = ChallengeEngine.generateTemplateChallenge('communication', 'comm_clarity', 65);
+        }
+
+        // Run live AI evaluation via Groq
+        let aiResult: RawAssessmentResult | undefined = undefined;
+        try {
+          const evalPrompt = `You are the objective evaluation sub-engine of the AI Mentor.
+Evaluate this user defense attempt strictly against the challenge rubric.
+Zero empty praise. Any violation of constraints, excessive brevity, or filler words must be penalized.
+
+CHALLENGE:
+Title: ${challenge.title}
+Instructions: ${challenge.instructions}
+Constraints: ${challenge.constraints.join('; ')}
+Time Limit: ${challenge.timeLimitSeconds} seconds
+Difficulty: ${challenge.difficulty}/100
+
+RUBRIC:
+${challenge.rubric.map(r => `- ${r.name} (${r.dimensionId}): pass threshold ${r.passThreshold}/100. Prompt: ${r.evalPrompt}`).join('\n')}
+
+USER DEFENSE TEXT:
+"${body.responseText || ''}"
+
+Output JSON matching:
+{
+  "dimensionScores": [{"dimensionId": "${challenge.dimensionId}", "score": number, "evidenceQuotes": string[], "identifiedMistakes": string[]}],
+  "whatWorkedWell": string[],
+  "whatFailed": string[],
+  "singleBiggestWeakness": string,
+  "whyItMatters": string,
+  "correctiveDrillInstructions": string
+}`;
+
+          const aiText = await aiRouter.complete([
+            { role: 'system', content: 'You are an objective rubric evaluator. Output valid JSON only.' },
+            { role: 'user', content: evalPrompt },
+          ], true);
+
+          if (aiText) {
+            const clean = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
+            aiResult = JSON.parse(clean);
+          }
+        } catch (e) {
+          console.warn('Groq AI evaluation in worker failed, falling back to deterministic:', e);
+        }
 
         // 1. Evaluate with AssessmentEngine
         const evaluation = AssessmentEngine.evaluateAttempt(
           challenge,
           body.responseText || '',
-          body.audioDurationSeconds
+          body.audioDurationSeconds,
+          aiResult
         );
 
         // 2. Progression Engine (Deterministic leveling)
         const dimId = challenge.dimensionId;
-        const currentState = globalStore.skillStates.get(dimId) || {
-          dimensionId: dimId,
-          skillId: challenge.skillId,
-          level: 1,
-          sublevel: 1,
-          score: 50.0,
-          confidence: 0.5,
-          trend: 'STABLE',
-          recentScores: [],
-          consecutivePasses: 0,
-          lastAssessedAt: null,
-        };
+        const currentState = turso 
+          ? await turso.getSkillState(dimId, challenge.skillId)
+          : (globalStore.skillStates.get(dimId) || {
+              dimensionId: dimId,
+              skillId: challenge.skillId,
+              level: 1,
+              sublevel: 1,
+              score: 50.0,
+              confidence: 0.20,
+              trend: 'STABLE' as const,
+              recentScores: [],
+              consecutivePasses: 0,
+              lastAssessedAt: null,
+            });
 
         const progResult = ProgressionEngine.updateProgression(
           currentState,
           evaluation.overallScore,
           evaluation.passed
         );
-        globalStore.skillStates.set(dimId, progResult.updatedState);
+
+        if (turso) {
+          await turso.updateSkillState(progResult.updatedState);
+        } else {
+          globalStore.skillStates.set(dimId, progResult.updatedState);
+        }
 
         // 3. Weakness Engine
+        const currentWeaknesses = turso ? await turso.getWeaknesses() : globalStore.weaknesses;
         const weaknessRes = WeaknessEngine.processEvaluation(
-          globalStore.weaknesses,
+          currentWeaknesses,
           evaluation,
           challenge.skillId
         );
-        globalStore.weaknesses = weaknessRes.updatedWeaknesses;
+
+        if (turso) {
+          await turso.upsertWeaknesses(weaknessRes.updatedWeaknesses);
+        } else {
+          globalStore.weaknesses = weaknessRes.updatedWeaknesses;
+        }
 
         // 4. Training Debt Engine
+        let currentDebts = turso ? await turso.getDebts() : globalStore.debts;
         let pointsDelta = 0;
         if (!evaluation.passed) {
-          const isRepeat = (globalStore.weaknesses.find(w => w.dimensionId === dimId)?.occurrenceCount || 0) >= 2;
+          const isRepeat = (currentWeaknesses.find(w => w.dimensionId === dimId)?.occurrenceCount || 0) >= 2;
           const reason = isRepeat ? 'REPEATED_FAILURE' : 'FAILED_CHALLENGE';
           const debtRes = TrainingDebtEngine.accrueDebt(
-            globalStore.debts,
+            currentDebts,
             reason,
             evaluation.brutalCritique.singleBiggestWeakness,
             challenge.targetWeaknessId,
             dimId
           );
-          globalStore.debts = debtRes.updatedDebts;
+          currentDebts = debtRes.updatedDebts;
           pointsDelta = debtRes.addedPoints;
         } else if (challenge.targetWeaknessId) {
-          // Cleared drill!
-          const clearRes = TrainingDebtEngine.clearDebt(globalStore.debts, 2);
-          globalStore.debts = clearRes.updatedDebts;
+          const clearRes = TrainingDebtEngine.clearDebt(currentDebts, 2);
+          currentDebts = clearRes.updatedDebts;
           pointsDelta = -clearRes.clearedPoints;
         }
 
-        const newDebtSummary = TrainingDebtEngine.calculateSummary(globalStore.debts);
+        if (turso) {
+          await turso.upsertDebts(currentDebts);
+        } else {
+          globalStore.debts = currentDebts;
+        }
+
+        const newDebtSummary = TrainingDebtEngine.calculateSummary(currentDebts);
 
         // 5. Gamification Engine
+        let gamification = turso ? await turso.getGamification() : globalStore.gamification;
         const xpDetails = GamificationEngine.calculateXp(
           challenge.difficulty,
           evaluation.passed,
-          globalStore.gamification.comboMultiplier,
+          gamification.comboMultiplier,
           !!challenge.targetWeaknessId
         );
 
         const todayStr = new Date().toISOString().split('T')[0];
-        globalStore.gamification = GamificationEngine.updateStreakAndCombos(
+        const updatedGamification = GamificationEngine.updateStreakAndCombos(
           {
-            ...globalStore.gamification,
-            totalXp: globalStore.gamification.totalXp + xpDetails.totalAwarded,
+            ...gamification,
+            totalXp: gamification.totalXp + xpDetails.totalAwarded,
           },
           todayStr,
           evaluation.passed
         );
 
+        if (turso) {
+          await turso.updateGamification(updatedGamification);
+        } else {
+          globalStore.gamification = updatedGamification;
+        }
+
         // Record attempt
-        const attempt = {
+        const attempt: Attempt = {
           id: evaluation.attemptId,
           challengeId: challenge.id,
           startedAt: new Date().toISOString(),
@@ -223,7 +345,12 @@ export default {
           mediaType: body.mediaType,
           evaluation,
         };
-        globalStore.attempts.push(attempt);
+
+        if (turso) {
+          await turso.saveAttempt(attempt);
+        } else {
+          globalStore.attempts.push(attempt);
+        }
 
         const response: SubmitAttemptResponse = {
           attempt,
@@ -243,30 +370,61 @@ export default {
           },
           gamificationUpdate: {
             xpEarned: xpDetails.totalAwarded,
-            newTotalXp: globalStore.gamification.totalXp,
-            streakDays: globalStore.gamification.currentStreakDays,
+            newTotalXp: updatedGamification.totalXp,
+            streakDays: updatedGamification.currentStreakDays,
           },
         };
 
         return jsonResponse(response);
       }
 
-      // 5. Skills Overview
+      // 5. Mentor Sparring Chat
+      if (path === '/api/chat' && request.method === 'POST') {
+        const body = await request.json() as any;
+        const messages = body.messages || [];
+        const debts = turso ? await turso.getDebts() : globalStore.debts;
+        const debt = TrainingDebtEngine.calculateSummary(debts);
+        const weaknesses = turso ? await turso.getWeaknesses() : globalStore.weaknesses;
+        const activeW = weaknesses.find(w => w.status !== 'RESOLVED');
+        const gamification = turso ? await turso.getGamification() : globalStore.gamification;
+
+        const systemPrompt = `You are the user's personal adversarial performance coach and AI Mentor.
+Core Directive: Maximize measurable real-world skill improvement. Never give empty praise.
+Current User Context:
+- Streak: ${gamification.currentStreakDays} days | Total XP: ${gamification.totalXp}
+- Training Debt: ${debt.totalActiveDebtPoints} points (${debt.mandatoryDrillsCount} mandatory drills required)
+- Active Unresolved Weakness: ${activeW ? activeW.description : 'None detected yet'}
+
+Tone: Direct, demanding, serious, and concise. No generic pleasantries. Call out hesitation and excuses immediately.`;
+
+        const chatMessages = [
+          { role: 'system' as const, content: systemPrompt },
+          ...messages.map((m: any) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+        ];
+
+        const reply = await aiRouter.complete(chatMessages, false);
+        return jsonResponse({ response: reply });
+      }
+
+      // 6. Skills Overview
       if (path === '/api/skills' && request.method === 'GET') {
-        return jsonResponse(globalStore.getSkillsOverview());
+        const skills = turso ? await turso.getSkillsOverview() : globalStore.getSkillsOverview();
+        return jsonResponse(skills);
       }
 
-      // 6. Weaknesses List
+      // 7. Weaknesses List
       if (path === '/api/weaknesses' && request.method === 'GET') {
-        return jsonResponse(globalStore.weaknesses);
+        const weaknesses = turso ? await turso.getWeaknesses() : globalStore.weaknesses;
+        return jsonResponse(weaknesses);
       }
 
-      // 7. Training Debt
+      // 8. Training Debt
       if (path === '/api/debt' && request.method === 'GET') {
-        return jsonResponse(TrainingDebtEngine.calculateSummary(globalStore.debts));
+        const debts = turso ? await turso.getDebts() : globalStore.debts;
+        return jsonResponse(TrainingDebtEngine.calculateSummary(debts));
       }
 
-      // 8. Reality Mission Dispatch
+      // 9. Reality Mission Dispatch
       if (path === '/api/reality/mission' && request.method === 'POST') {
         const body = await request.json().catch(() => ({})) as any;
         const skillId = body.skillId || 'communication';
@@ -274,12 +432,20 @@ export default {
         return jsonResponse(mission);
       }
 
-      // 9. Telegram Webhook Handler
+      // 10. Telegram Webhook Handler
       if (path === '/api/telegram/webhook' && request.method === 'POST') {
         const payload: TelegramWebhookPayload = await request.json();
         const message = payload.message;
         const text = (message?.text || '').trim();
         const chatId = message?.chat?.id;
+
+        const debts = turso ? await turso.getDebts() : globalStore.debts;
+        const debt = TrainingDebtEngine.calculateSummary(debts);
+        const weaknesses = turso ? await turso.getWeaknesses() : globalStore.weaknesses;
+        const topW = weaknesses.find(w => w.status !== 'RESOLVED');
+        const gamification = turso ? await turso.getGamification() : globalStore.gamification;
+        const skills = turso ? await turso.getSkillsOverview() : globalStore.getSkillsOverview();
+        const avgLevel = (skills.reduce((acc, s) => acc + s.overallLevel + s.overallSublevel / 10, 0) / Math.max(1, skills.length)).toFixed(1);
 
         let replyText = 'AI Mentor Operating System Active. Commands: /today, /train, /debt, /reflect';
 
@@ -294,18 +460,13 @@ Commands:
 • /reflect — Submit reflection on Reality Mission
 • Send voice memo or video note to log exercise recording.`;
         } else if (text === '/today') {
-          const debt = TrainingDebtEngine.calculateSummary(globalStore.debts);
-          const topW = globalStore.weaknesses.find(w => w.status !== 'RESOLVED');
-          const skills = globalStore.getSkillsOverview();
-          const avgLevel = (skills.reduce((acc, s) => acc + s.overallLevel + s.overallSublevel / 10, 0) / Math.max(1, skills.length)).toFixed(1);
           replyText = `📅 *TODAY'S BRIEFING*
-• Level: ${avgLevel} | Streak: ${globalStore.gamification.currentStreakDays} Days
+• Level: ${avgLevel} | Streak: ${gamification.currentStreakDays} Days
 • Target: 25 Minutes Training
 • Focus: Communication & Articulation
 • Priority Weakness: ${topW ? topW.description : 'None detected yet'}
 • Training Debt: ${debt.totalActiveDebtPoints} Points (${debt.mandatoryDrillsCount} drills required)`;
         } else if (text === '/debt') {
-          const debt = TrainingDebtEngine.calculateSummary(globalStore.debts);
           replyText = `⚠️ *TRAINING DEBT STATUS*
 Total Debt: ${debt.totalActiveDebtPoints} Points
 Mandatory Remediation Drills: ${debt.mandatoryDrillsCount}
@@ -313,7 +474,7 @@ Unresolved items: ${debt.unresolvedDebts.length}
 
 Complete your corrective drills to clear debt and unlock progression.`;
         } else if (message?.voice || message?.video_note) {
-          replyText = `🎙️ Media received and logged to Cloudflare R2 evidence storage. Evaluating speech cadence and filler word density...`;
+          replyText = `🎙️ Media received. Evaluating speech cadence and filler word density...`;
         }
 
         return jsonResponse({

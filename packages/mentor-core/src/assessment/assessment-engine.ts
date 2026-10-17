@@ -81,7 +81,7 @@ export class AssessmentEngine {
 
     // Combine what failed with acoustic reasons if applicable
     const allFailures = [
-      ...rawResult.whatFailed,
+      ...(rawResult.whatFailed || []),
       ...speechPenaltyReasons,
     ];
 
@@ -92,7 +92,7 @@ export class AssessmentEngine {
       passed,
       dimensionScores: dimensionEvaluations,
       brutalCritique: {
-        whatWorkedWell: rawResult.whatWorkedWell.length > 0 ? rawResult.whatWorkedWell : ['Maintained effort to attempt challenge'],
+        whatWorkedWell: (rawResult.whatWorkedWell && rawResult.whatWorkedWell.length > 0) ? rawResult.whatWorkedWell : ['Maintained effort to attempt challenge'],
         whatFailed: allFailures.length > 0 ? allFailures : ['Did not hit executive standard of precision'],
         singleBiggestWeakness: rawResult.singleBiggestWeakness || (speechPenaltyReasons[0] || 'Vagueness and lack of crisp structural logic'),
         whyItMatters: rawResult.whyItMatters || 'In high-stakes environments, ambiguity or hesitation causes immediate loss of credibility and leverage.',

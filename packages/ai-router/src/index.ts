@@ -21,10 +21,11 @@ export class AIRouter {
   private config: AIRouterConfig;
 
   constructor(config?: AIRouterConfig) {
+    const env = typeof process !== 'undefined' && process.env ? process.env : ({} as Record<string, string | undefined>);
     this.config = {
-      groqApiKey: process.env.GROQ_API_KEY,
-      cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
-      cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,
+      groqApiKey: env.GROQ_API_KEY,
+      cloudflareAccountId: env.CLOUDFLARE_ACCOUNT_ID,
+      cloudflareApiToken: env.CLOUDFLARE_API_TOKEN,
       ...(config || {}),
     };
   }
