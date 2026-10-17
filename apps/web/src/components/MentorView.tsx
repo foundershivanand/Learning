@@ -59,7 +59,7 @@ export function MentorView() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] pb-20 pt-2">
+    <div className="flex flex-col h-[calc(100vh-6rem)] pb-12 pt-2 max-w-5xl mx-auto w-full">
       {/* Header */}
       <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-4 shadow-sm flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">

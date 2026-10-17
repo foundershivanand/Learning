@@ -24,34 +24,34 @@ export class MentorStore {
   constructor() {
     this.profile = {
       id: '00000000-0000-0000-0000-000000000001',
-      name: 'Private Founder',
+      name: 'You',
       goals: [
-        'Master High-Stakes Communication',
-        'Scale Venture to $1M ARR with Bulletproof Economics',
-        'Reach 1800 Chess & Blindfold Piece Tracking',
+        'Master High-Stakes Communication & Articulation',
+        'Master Entrepreneurial Business Execution',
+        'Reach 1800 Chess & Blindfold Visualization',
       ],
       rules: [
         'Never give empty praise',
         'Make me fail',
         'Enforce training debt immediately',
       ],
-      dailyTargetMinutes: 30,
+      dailyTargetMinutes: 25,
       timezone: 'Asia/Kolkata',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
     this.gamification = {
-      totalXp: 1250,
-      currentStreakDays: 14,
-      longestStreakDays: 14,
-      lastActiveDate: new Date().toISOString().split('T')[0],
-      comboMultiplier: 1.30,
-      bossClearsCount: 1,
-      unlockedTiers: ['TIER_1', 'TIER_2'],
+      totalXp: 0,
+      currentStreakDays: 0,
+      longestStreakDays: 0,
+      lastActiveDate: null,
+      comboMultiplier: 1.00,
+      bossClearsCount: 0,
+      unlockedTiers: ['TIER_1'],
     };
 
-    // Initialize all 15 skills and baseline states
+    // Initialize all 15 skills to Level 1.1 baseline
     this.initializeDefaultSkills();
     this.initializeStarterChallenges();
   }
@@ -59,50 +59,27 @@ export class MentorStore {
   private initializeDefaultSkills() {
     for (const skill of ALL_SKILLS) {
       for (const dim of skill.dimensions) {
-        // Initialize baseline state
+        // True baseline state: Level 1.1, Untested
         this.skillStates.set(dim.id, {
           dimensionId: dim.id,
           skillId: skill.id,
           level: 1,
-          sublevel: 2,
-          score: 58.0,
-          confidence: 0.55,
+          sublevel: 1,
+          score: 50.0,
+          confidence: 0.20,
           trend: 'STABLE',
-          recentScores: [56, 58, 60],
-          consecutivePasses: 1,
-          lastAssessedAt: new Date().toISOString(),
+          recentScores: [],
+          consecutivePasses: 0,
+          lastAssessedAt: null,
         });
       }
     }
 
-    // Set sample active weakness for immediate testing
-    this.weaknesses.push({
-      id: 'weak-starter-1',
-      skillId: 'communication',
-      dimensionId: 'comm_fluency',
-      dimensionName: 'Fluency & Cadence',
-      description: 'Persistent filler words ("basically", "like") under time pressure',
-      severity: 'HIGH',
-      confidence: 0.85,
-      occurrenceCount: 3,
-      consecutivePasses: 0,
-      status: 'ACTIVE',
-      firstDetectedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-      lastDetectedAt: new Date().toISOString(),
-      recentEvidence: ['Used "basically" 4 times in 30 seconds', 'Hesitation pause of 4 seconds'],
-    });
+    // Zero fake weaknesses: weaknesses will only be detected from user's actual attempts
+    this.weaknesses = [];
 
-    // Sample training debt
-    this.debts.push({
-      id: 'debt-starter-1',
-      weaknessId: 'weak-starter-1',
-      dimensionId: 'comm_fluency',
-      points: 2,
-      reason: 'REPEATED_FAILURE',
-      description: 'Failed fluency check twice in succession',
-      createdAt: new Date().toISOString(),
-      resolvedAt: null,
-    });
+    // Zero fake debt: debt is accrued when user fails or misses challenges
+    this.debts = [];
   }
 
   private initializeStarterChallenges() {

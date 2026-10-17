@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Navigation, TabType } from '../components/Navigation';
+import { DesktopSidebar } from '../components/DesktopSidebar';
 import { HomeView } from '../components/HomeView';
 import { TrainView } from '../components/TrainView';
 import { SkillsView } from '../components/SkillsView';
@@ -9,7 +10,7 @@ import { ProgressView } from '../components/ProgressView';
 import { MentorView } from '../components/MentorView';
 import { ApiClient } from '../lib/api-client';
 import { TodayDashboardResponse, RealityMission } from '@personal-mentor/shared';
-import { Zap, X, Compass, AlertCircle } from 'lucide-react';
+import { Zap, X, Compass, ShieldAlert, Flame } from 'lucide-react';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('home');
@@ -44,87 +45,129 @@ export default function App() {
     );
   }
 
+  const overallLevel = dashboardData.skillsOverview && dashboardData.skillsOverview.length > 0
+    ? dashboardData.skillsOverview.reduce((acc, s) => acc + s.overallScore, 0) / dashboardData.skillsOverview.length / 10
+    : 1.1;
+
   return (
-    <main className="min-h-screen bg-mentor-bg text-gray-100 flex justify-center">
-      {/* Mobile-constrained viewport container */}
-      <div className="w-full max-w-md min-h-screen flex flex-col px-4 relative">
-        {/* Active Tab View */}
-        {currentTab === 'home' && (
-          <HomeView
-            data={dashboardData}
-            realityMission={realityMission}
-            onStartTraining={() => setCurrentTab('train')}
-            onOpenSkills={() => setCurrentTab('skills')}
-            onOpenReality={() => setShowRealityModal(true)}
-          />
-        )}
+    <div className="min-h-screen bg-mentor-bg text-gray-100 flex flex-col md:flex-row">
+      {/* Desktop Sidebar (Left side, hidden on mobile) */}
+      <DesktopSidebar
+        currentTab={currentTab}
+        onSelectTab={setCurrentTab}
+        debtPoints={dashboardData.trainingDebt.totalActiveDebtPoints}
+        streakDays={dashboardData.gamification.currentStreakDays}
+        totalXp={dashboardData.gamification.totalXp}
+        overallLevel={overallLevel > 1.0 ? overallLevel : 1.1}
+        userName={dashboardData.profile.name}
+        onStartTraining={() => setCurrentTab('train')}
+      />
 
-        {currentTab === 'train' && (
-          <TrainView
-            onChallengeComplete={() => {
-              // Refresh state in background
-              loadDashboard();
-            }}
-          />
-        )}
+      {/* Main Content Area (Expansive for desktop, mobile-scrollable) */}
+      <main className="md:pl-64 lg:pl-72 flex-1 w-full min-h-screen bg-mentor-bg flex flex-col">
+        {/* Top Desktop Bar */}
+        <header className="hidden md:flex items-center justify-between px-8 py-5 border-b border-mentor-border/60 bg-mentor-surface/40 backdrop-blur-sm sticky top-0 z-30">
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-mentor-muted">Active Operating View</div>
+            <h1 className="text-lg font-black text-white capitalize">
+              {currentTab === 'home' && "Today's Briefing & Performance Matrix"}
+              {currentTab === 'train' && 'Adversarial Practice Arena'}
+              {currentTab === 'skills' && '15 Skills Mastery Taxonomy'}
+              {currentTab === 'progress' && 'Performance & Remediation Trajectory'}
+              {currentTab === 'mentor' && 'Socratic Sparring & Accountability Console'}
+            </h1>
+          </div>
 
-        {currentTab === 'skills' && (
-          <SkillsView skillsOverview={dashboardData.skillsOverview} />
-        )}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-mentor-surface border border-mentor-border text-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="text-gray-300 font-semibold">Engine: Deterministic Math</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1c1407] border border-amber-900/60 text-mentor-accent text-xs font-bold">
+              <Flame size={14} className="fill-mentor-accent" />
+              <span>{dashboardData.gamification.currentStreakDays}D Streak</span>
+            </div>
+          </div>
+        </header>
 
-        {currentTab === 'progress' && (
-          <ProgressView
-            weaknesses={dashboardData.primaryWeakness ? [dashboardData.primaryWeakness] : []}
-            trainingDebt={dashboardData.trainingDebt}
-            gamification={dashboardData.gamification}
-          />
-        )}
+        {/* View Container */}
+        <div className="flex-1 w-full px-4 sm:px-6 md:px-8 py-4 md:py-6">
+          {currentTab === 'home' && (
+            <HomeView
+              data={dashboardData}
+              realityMission={realityMission}
+              onStartTraining={() => setCurrentTab('train')}
+              onOpenSkills={() => setCurrentTab('skills')}
+              onOpenReality={() => setShowRealityModal(true)}
+            />
+          )}
 
-        {currentTab === 'mentor' && (
-          <MentorView />
-        )}
+          {currentTab === 'train' && (
+            <TrainView
+              onChallengeComplete={() => {
+                loadDashboard();
+              }}
+            />
+          )}
+
+          {currentTab === 'skills' && (
+            <SkillsView skillsOverview={dashboardData.skillsOverview} />
+          )}
+
+          {currentTab === 'progress' && (
+            <ProgressView
+              weaknesses={dashboardData.primaryWeakness ? [dashboardData.primaryWeakness] : []}
+              trainingDebt={dashboardData.trainingDebt}
+              gamification={dashboardData.gamification}
+            />
+          )}
+
+          {currentTab === 'mentor' && (
+            <MentorView />
+          )}
+        </div>
 
         {/* Reality Mode Modal */}
         {showRealityModal && realityMission && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-mentor-surface border border-mentor-border rounded-2xl max-w-sm w-full p-5 shadow-2xl relative">
+            <div className="bg-mentor-surface border border-mentor-border rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
               <button
                 onClick={() => setShowRealityModal(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                className="absolute top-5 right-5 text-gray-400 hover:text-white"
               >
-                <X size={18} />
+                <X size={20} />
               </button>
 
               <div className="flex items-center gap-1.5 text-cyan-400 font-bold uppercase tracking-wider text-xs mb-2">
                 <Compass size={16} />
-                Reality Mode Protocol
+                Reality Mode Field Protocol
               </div>
-              <h3 className="text-base font-bold text-white mb-2">{realityMission.title}</h3>
+              <h3 className="text-lg font-black text-white mb-3">{realityMission.title}</h3>
 
-              <div className="bg-[#0b0e17] border border-cyan-950 p-3 rounded-xl mb-3">
-                <span className="text-[11px] font-bold text-cyan-300 uppercase">Scenario</span>
-                <p className="text-xs text-gray-300 mt-1 leading-relaxed">
+              <div className="bg-[#0b0e17] border border-cyan-950 p-4 rounded-2xl mb-3">
+                <span className="text-[11px] font-bold text-cyan-300 uppercase">Real-World Scenario</span>
+                <p className="text-xs md:text-sm text-gray-300 mt-1 leading-relaxed">
                   {realityMission.realWorldScenario}
                 </p>
               </div>
 
-              <div className="bg-[#091512] border border-emerald-950 p-3 rounded-xl mb-3">
+              <div className="bg-[#091512] border border-emerald-950 p-4 rounded-2xl mb-3">
                 <span className="text-[11px] font-bold text-emerald-400 uppercase">Concrete Objective</span>
-                <p className="text-xs text-emerald-100 mt-1 leading-relaxed">
+                <p className="text-xs md:text-sm text-emerald-100 mt-1 leading-relaxed">
                   {realityMission.concreteObjective}
                 </p>
               </div>
 
-              <div className="bg-[#1c0f12] border border-rose-950 p-3 rounded-xl mb-4">
+              <div className="bg-[#1c0f12] border border-rose-950 p-4 rounded-2xl mb-5">
                 <span className="text-[11px] font-bold text-mentor-danger uppercase">Anti-Goal (Do NOT do this)</span>
-                <p className="text-xs text-rose-200 mt-1 leading-relaxed">
+                <p className="text-xs md:text-sm text-rose-200 mt-1 leading-relaxed">
                   {realityMission.antiGoal}
                 </p>
               </div>
 
               <button
                 onClick={() => setShowRealityModal(false)}
-                className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-xs rounded-xl shadow-lg"
+                className="w-full py-3.5 bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs md:text-sm rounded-xl shadow-lg transition-all"
               >
                 Accept Field Mission
               </button>
@@ -132,13 +175,13 @@ export default function App() {
           </div>
         )}
 
-        {/* Bottom Navigation */}
+        {/* Mobile-Only Bottom Navigation */}
         <Navigation
           currentTab={currentTab}
           onSelectTab={setCurrentTab}
           debtPoints={dashboardData.trainingDebt.totalActiveDebtPoints}
         />
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

@@ -23,35 +23,38 @@ export function ProgressView({ weaknesses, trainingDebt, gamification }: Progres
   const resolvedWeaknesses = weaknesses.filter(w => w.status === 'RESOLVED');
 
   return (
-    <div className="flex flex-col gap-5 pb-24 pt-2">
+    <div className="flex flex-col gap-6 pb-24 pt-2 max-w-7xl mx-auto w-full">
       {/* Header Summary */}
-      <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-5 shadow-sm">
+      <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-6 shadow-sm">
         <div className="flex items-center gap-2 text-mentor-accent text-xs font-bold uppercase tracking-wider mb-3">
           <BarChart3 size={16} />
           Performance & Remediation Trajectory
         </div>
 
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-[#090b10] border border-mentor-border p-3 rounded-xl">
+        <div className="grid grid-cols-3 gap-3 text-center">
+          <div className="bg-[#090b10] border border-mentor-border p-4 rounded-xl">
             <div className="text-[10px] text-gray-400 uppercase font-semibold">Streak</div>
-            <div className="text-lg font-bold text-mentor-accent flex items-center justify-center gap-1 mt-0.5">
-              <Flame size={16} className="fill-mentor-accent" />
+            <div className="text-xl font-black text-mentor-accent flex items-center justify-center gap-1.5 mt-1">
+              <Flame size={18} className="fill-mentor-accent" />
               {gamification.currentStreakDays}D
             </div>
           </div>
-          <div className="bg-[#090b10] border border-mentor-border p-3 rounded-xl">
+          <div className="bg-[#090b10] border border-mentor-border p-4 rounded-xl">
             <div className="text-[10px] text-gray-400 uppercase font-semibold">Total XP</div>
-            <div className="text-lg font-bold text-white mt-0.5">{gamification.totalXp}</div>
+            <div className="text-xl font-black text-white mt-1">{gamification.totalXp}</div>
           </div>
-          <div className="bg-[#090b10] border border-mentor-border p-3 rounded-xl">
+          <div className="bg-[#090b10] border border-mentor-border p-4 rounded-xl">
             <div className="text-[10px] text-gray-400 uppercase font-semibold">Boss Clears</div>
-            <div className="text-lg font-bold text-emerald-400 flex items-center justify-center gap-1 mt-0.5">
-              <Trophy size={15} />
+            <div className="text-xl font-black text-emerald-400 flex items-center justify-center gap-1.5 mt-1">
+              <Trophy size={18} />
               {gamification.bossClearsCount}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Responsive Two-Column Grid on Desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
       {/* Training Debt Ledger */}
       <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-4">
@@ -120,6 +123,7 @@ export function ProgressView({ weaknesses, trainingDebt, gamification }: Progres
             ))}
           </div>
         )}
+      </div>
       </div>
 
       {/* Resolved Weaknesses Section */}
