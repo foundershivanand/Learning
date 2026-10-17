@@ -13,6 +13,9 @@ export const COMMON_FILLER_WORDS = [
   'honestly',
   'i mean',
   'right',
+  'o sea',
+  'eh',
+  'em',
 ];
 
 export class SpeechAnalyzer {

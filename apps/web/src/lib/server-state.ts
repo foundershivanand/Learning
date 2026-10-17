@@ -182,6 +182,34 @@ export class MentorServerStore {
           }
         ],
         createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'chal-starter-spanish-1',
+        skillId: 'spanish',
+        dimensionId: 'spanish_spontaneous_fluency',
+        type: 'ROLEPLAY',
+        title: 'High-Stakes Airport Gate Crisis in Barcelona',
+        instructions: 'Your connecting flight from Barcelona to Buenos Aires is closing its gates in 5 minutes. The gate agent announces in Spanish that your carry-on luggage exceeds dimensions and must be checked, which will cause you to miss your final connection. Convince the gate agent in Spanish to let you board with the bag immediately.',
+        adversaryContext: 'Harried gate agent strictly enforcing airline carry-on regulations.',
+        constraints: [
+          'Zero English allowed (automatic failure if any English word is uttered)',
+          'Must use formal address ("Usted") and polite imperative or subjunctive ("Le ruego que me permita...")',
+          'Time limit: 60 seconds',
+        ],
+        timeLimitSeconds: 60,
+        difficulty: 65,
+        isBossChallenge: false,
+        rubric: [
+          {
+            dimensionId: 'spanish_spontaneous_fluency',
+            name: 'Spontaneous Spoken Spanish Fluency',
+            maxScore: 100,
+            weight: 1.3,
+            passThreshold: 70,
+            evalPrompt: 'Verify 100% Spanish response, formal register, and quick tactical negotiation.',
+          }
+        ],
+        createdAt: new Date().toISOString(),
       }
     ];
 

@@ -161,7 +161,7 @@ export function renderDashboardHtml(): string {
               {[
                 { id: 'home', label: 'Overview', icon: 'home', desc: "Today's Briefing" },
                 { id: 'train', label: 'Practice Arena', icon: 'zap', desc: 'Deliberate Drills', badge: data.trainingDebt.totalActiveDebtPoints > 0 ? data.trainingDebt.totalActiveDebtPoints : null },
-                { id: 'skills', label: '15 Skills Matrix', icon: 'layers', desc: 'Mastery Breakdown' },
+                { id: 'skills', label: '16 Skills Matrix', icon: 'layers', desc: 'Mastery Breakdown' },
                 { id: 'progress', label: 'Progress & Debt', icon: 'bar-chart-3', desc: 'Remediation Ledger' },
                 { id: 'mentor', label: 'Mentor Sparring', icon: 'message-square', desc: 'Socratic Debrief' },
               ].map(item => (
@@ -206,7 +206,7 @@ export function renderDashboardHtml(): string {
                 <h1 className="text-lg font-black text-white capitalize">
                   {currentTab === 'home' && "Today's Briefing & Performance Matrix"}
                   {currentTab === 'train' && 'Adversarial Practice Arena'}
-                  {currentTab === 'skills' && '15 Skills Mastery Taxonomy'}
+                  {currentTab === 'skills' && '16 Skills Mastery Taxonomy'}
                   {currentTab === 'progress' && 'Performance & Remediation Trajectory'}
                   {currentTab === 'mentor' && 'Socratic Sparring & Accountability Console'}
                 </h1>
@@ -306,7 +306,7 @@ export function renderDashboardHtml(): string {
             {[
               { id: 'home', label: 'Briefing', icon: 'home' },
               { id: 'train', label: 'Practice', icon: 'zap' },
-              { id: 'skills', label: '15 Skills', icon: 'layers' },
+              { id: 'skills', label: '16 Skills', icon: 'layers' },
               { id: 'progress', label: 'Debt', icon: 'bar-chart-3' },
               { id: 'mentor', label: 'Mentor', icon: 'message-square' },
             ].map(item => (
@@ -452,8 +452,8 @@ export function renderDashboardHtml(): string {
               {/* Skills Bar */}
               <div className="bg-mentor-surface border border-mentor-border rounded-3xl p-6 shadow-md">
                 <div className="flex items-center justify-between text-xs mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-white">15 Skills Mastery Matrix</span>
-                  <button onClick={onOpenSkills} className="text-mentor-accent hover:underline text-xs font-semibold">View All 15 →</button>
+                  <span className="text-xs font-bold uppercase tracking-wider text-white">16 Skills Mastery Matrix</span>
+                  <button onClick={onOpenSkills} className="text-mentor-accent hover:underline text-xs font-semibold">View All 16 →</button>
                 </div>
                 <div className="flex flex-col gap-2.5">
                   {data.skillsOverview.slice(0, 5).map(s => (
@@ -487,6 +487,7 @@ export function renderDashboardHtml(): string {
       { id: 'learning_ability', label: '📚 13. Fast Learning (Feynman 10-Year-Old Reduction)' },
       { id: 'creativity', label: '🎨 14. Creativity (TRIZ Problem Inversion)' },
       { id: 'discipline_execution', label: '⚡ 15. Discipline & Execution (Anti-Avoidance Protocol)' },
+      { id: 'spanish', label: '🇪🇸 16. Spanish (Spontaneous Fluency & Conjugation)' },
     ];
 
     function TrainView({ onChallengeComplete, initialSkillId = '' }) {
@@ -880,7 +881,7 @@ export function renderDashboardHtml(): string {
       return (
         <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
           <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-5 shadow-sm">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-mentor-accent">15-Skill Mastery Matrix</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-mentor-accent">16-Skill Mastery Matrix</h2>
             <p className="text-xs text-gray-400 mt-1">Progression requires 3 consecutive clean passes under adversarial conditions.</p>
             <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-1">
               {['all', 'communication', 'business', 'cognition', 'tactics', 'execution'].map(cat => (

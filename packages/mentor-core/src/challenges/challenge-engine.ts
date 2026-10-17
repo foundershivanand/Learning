@@ -110,7 +110,7 @@ export class ChallengeEngine {
   }
 
   /**
-   * Generates masterclass, high-friction, elite challenges across all 15 skills.
+   * Generates masterclass, high-friction, elite challenges across all 16 skills.
    */
   public static generateTemplateChallenge(
     skillId: string, 
@@ -474,6 +474,31 @@ export class ChallengeEngine {
             weight: 1.5,
             passThreshold: 80,
             evalPrompt: 'Evaluate absence of self-deception and immediate commitment to uncomfortable action.',
+          }
+        ],
+      },
+
+      // 16. Spanish (Spontaneous Fluency & Conjugation)
+      spanish: {
+        type: 'ROLEPLAY',
+        title: 'Emergency Medical & Legal Triage in Madrid',
+        instructions: 'You are at a Madrid hospital emergency desk after your colleague suffered sudden acute food poisoning and lost their passport. The intake administrator speaks strictly Spanish and insists: "Sin identificación válida ni póliza de seguro local, no podemos admitirlo de inmediato a menos que demuestre que es una emergencia vital." Convince the administrator to admit your colleague immediately, explain their critical symptoms (deshidratación severa y fiebre alta), and guarantee financial responsibility.',
+        adversaryContext: 'Rigid hospital intake bureaucrat following strict European healthcare protocol.',
+        constraints: [
+          'Zero English allowed (automatic failure if any English word is uttered)',
+          'Must utilize at least one subjunctive phrase (e.g., "exijo que lo atiendan", "dudo que pueda esperar", "en cuanto llegue el médico")',
+          'Must clearly distinguish between preterite and imperfect when describing how the symptoms began',
+          'Time ceiling: 60 seconds',
+        ],
+        timeLimitSeconds: 60,
+        rubric: [
+          {
+            dimensionId: dimensionId || 'spanish_spontaneous_fluency',
+            name: 'Spontaneous Fluency & Pressure Spanish Defense',
+            maxScore: 100,
+            weight: 1.4,
+            passThreshold: 75,
+            evalPrompt: 'Evaluate Spanish fluency, accurate use of subjunctive and past tenses, absence of English crutches, and persuasive negotiation posture.',
           }
         ],
       },

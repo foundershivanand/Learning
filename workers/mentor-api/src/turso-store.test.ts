@@ -13,7 +13,7 @@ describe('Turso Database Store Integration', () => {
     assert.strictEqual(profile.name, 'Shivanand');
 
     const skills = await store.getSkillsOverview();
-    assert.strictEqual(skills.length, 15);
+    assert.strictEqual(skills.length, 16);
     assert.strictEqual(skills[0].overallLevel, 1);
     assert.strictEqual(skills[0].overallSublevel, 1);
 

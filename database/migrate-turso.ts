@@ -214,8 +214,8 @@ export async function runMigration() {
     });
   }
 
-  // Seed all 15 skills & baseline dimensions
-  console.log('Upserting 15 skills and baseline dimension states in Turso...');
+  // Seed all 16 skills & baseline dimensions
+  console.log('Upserting 16 skills and baseline dimension states in Turso...');
   for (const skill of ALL_SKILLS) {
     await client.execute({
       sql: `INSERT OR REPLACE INTO skills (id, name, description, category, active, created_at)

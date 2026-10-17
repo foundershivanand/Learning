@@ -1,0 +1,61 @@
+{
+  "id": "spanish",
+  "name": "Spanish",
+  "category": "communication",
+  "description": "Spontaneous conversational fluency, rapid subjunctive and tense conjugation under time pressure, real-time vocabulary retrieval without English crutches, and situational high-stakes immersion.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "spanish_spontaneous_fluency",
+      "skillId": "spanish",
+      "name": "Spontaneous Fluency & Cadence",
+      "description": "Real-time spoken Spanish delivery, rapid retrieval under time pressure, zero English filler words (e.g., 'like', 'um', 'este', 'o sea').",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Immediate fluid delivery at 120-150 WPM in authentic Spanish; zero English intrusions; natural connectives (sin embargo, por lo tanto).",
+        "70-89": "Consistent conversational flow with minor hesitation; 1-2 minor pauses; communicative intent preserved.",
+        "50-69": "Frequent mid-sentence stalls (>3s); persistent code-switching or English crutches; broken cadence.",
+        "0-49": "Inability to formulate coherent sentences in Spanish; freezes or relies almost entirely on English."
+      }
+    },
+    {
+      "id": "spanish_grammar_conjugation",
+      "skillId": "spanish",
+      "name": "Grammatical & Tense Conjugation Precision",
+      "description": "Subjunctive vs. Indicative, Preterite vs. Imperfect, Por vs. Para, Ser vs. Estar, and direct/indirect object pronoun placement under cognitive load.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Flawless mood and tense selection (correct subjunctive in doubt/hypotheticals, accurate preterite/imperfect distinctions, accurate clitic pronoun placement).",
+        "70-89": "Generally correct syntax and verb stems; 1-2 minor tense slips that do not distort meaning.",
+        "50-69": "Frequent grammatical breakdowns (confusing ser/estar, incorrect past tense aspect, missing required subjunctive).",
+        "0-49": "Pervasive structural errors; wrong verb conjugations make meaning unintelligible."
+      }
+    },
+    {
+      "id": "spanish_lexical_retrieval",
+      "skillId": "spanish",
+      "name": "Contextual Vocabulary & Idiomatic Precision",
+      "description": "Domain-specific lexical retrieval, appropriate idiomatic expressions, avoiding false cognates (falsos amigos) under conversational pressure.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Rich, nuanced vocabulary tailored to context; authentic idioms; zero false cognates (e.g. éxito vs salida, actual vs corriente).",
+        "70-89": "Accurate functional vocabulary; minor circumlocution or slightly stiff phrasing.",
+        "50-69": "Imprecise vocabulary; literal English calques; awkward word choices.",
+        "0-49": "Extremely limited vocabulary; invents false Spanish words based on English words."
+      }
+    },
+    {
+      "id": "spanish_situational_immersion",
+      "skillId": "spanish",
+      "name": "Situational Immersion & Pressure Negotiation",
+      "description": "Navigating high-stakes real-world pressure scenarios (emergency triage, contract dispute, landlord conflict, airport crisis) entirely in Spanish.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Resolves complex, adversarial situational objectives assertively and diplomatically in full Spanish.",
+        "70-89": "Addresses situational demands well with minor hesitation in negotiation posture.",
+        "50-69": "Struggles to command the situation; yields authority due to linguistic friction.",
+        "0-49": "Fails the situational challenge; breaks character or reverts to English."
+      }
+    }
+  ]
+}

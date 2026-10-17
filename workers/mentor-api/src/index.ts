@@ -493,7 +493,9 @@ Output JSON matching:
       // 5. Mentor Sparring Chat
       if (path === '/api/chat' && request.method === 'POST') {
         const body = await request.json() as any;
-        const messages = body.messages || [];
+        const messages = Array.isArray(body.messages) && body.messages.length > 0 
+          ? body.messages 
+          : (body.message ? [{ role: 'user', content: String(body.message) }] : []);
         const debts = turso ? await turso.getDebts() : globalStore.debts;
         const debt = TrainingDebtEngine.calculateSummary(debts);
         const weaknesses = turso ? await turso.getWeaknesses() : globalStore.weaknesses;

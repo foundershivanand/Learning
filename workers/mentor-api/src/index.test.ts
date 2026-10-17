@@ -22,7 +22,7 @@ describe('mentor-api Cloudflare Worker Endpoints', () => {
     assert.ok(body.profile);
     assert.ok(body.dailyPlan);
     assert.ok(body.trainingDebt);
-    assert.ok(body.skillsOverview.length >= 15, `Expected 15 skills, got ${body.skillsOverview.length}`);
+    assert.ok(body.skillsOverview.length >= 16, `Expected 16 skills, got ${body.skillsOverview.length}`);
   });
 
   it('GET /api/challenge/next returns a targeted challenge', async () => {
@@ -87,5 +87,17 @@ describe('mentor-api Cloudflare Worker Endpoints', () => {
     const tgData = await tgRes.json() as any;
     assert.strictEqual(tgData.ok, true);
     assert.ok(tgData.replyText.includes('TODAY'));
+  });
+
+  it('GET /api/challenge/next?skill=spanish returns a high-stakes Spanish challenge', async () => {
+    const req = new Request('http://localhost/api/challenge/next?skill=spanish', { method: 'GET' });
+    const res = await worker.fetch(req, {}, {});
+    assert.strictEqual(res.status, 200);
+
+    const challenge = await res.json() as any;
+    assert.strictEqual(challenge.skillId, 'spanish');
+    assert.ok(challenge.title);
+    assert.ok(challenge.instructions);
+    assert.ok(challenge.constraints.length >= 2);
   });
 });

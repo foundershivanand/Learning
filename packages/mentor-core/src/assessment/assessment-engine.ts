@@ -51,7 +51,7 @@ export class AssessmentEngine {
       let baseScore = match ? match.score : 60;
 
       // Apply speech penalty if applicable to communication or delivery dimensions
-      if (rubricDim.dimensionId.includes('comm') || rubricDim.dimensionId.includes('fluency') || rubricDim.dimensionId.includes('delivery')) {
+      if (rubricDim.dimensionId.includes('comm') || rubricDim.dimensionId.includes('fluency') || rubricDim.dimensionId.includes('delivery') || rubricDim.dimensionId.includes('spanish')) {
         baseScore = Math.max(0, baseScore - speechPenalty);
       }
 

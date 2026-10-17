@@ -45,6 +45,7 @@ const SKILL_OPTIONS = [
   { id: 'learning_ability', label: '📚 13. Fast Learning (Feynman 10-Year-Old Reduction)' },
   { id: 'creativity', label: '🎨 14. Creativity (TRIZ Problem Inversion)' },
   { id: 'discipline_execution', label: '⚡ 15. Discipline & Execution (Anti-Avoidance Protocol)' },
+  { id: 'spanish', label: '🇪🇸 16. Spanish (Spontaneous Fluency & Conjugation)' },
 ];
 
 export function TrainView({ initialChallenge, initialSkill = '', onChallengeComplete }: TrainViewProps) {
@@ -203,7 +204,7 @@ export function TrainView({ initialChallenge, initialSkill = '', onChallengeComp
     return (
       <div className="text-center py-20 text-gray-400">
         <p>No active challenge available.</p>
-        <button onClick={loadNextChallenge} className="mt-4 px-5 py-2.5 bg-mentor-surface border border-mentor-border rounded-xl text-sm font-bold text-white hover:border-mentor-accent">
+        <button onClick={() => loadNextChallenge(selectedSkill)} className="mt-4 px-5 py-2.5 bg-mentor-surface border border-mentor-border rounded-xl text-sm font-bold text-white hover:border-mentor-accent">
           Refresh Practice Arena
         </button>
       </div>
@@ -574,7 +575,7 @@ export function TrainView({ initialChallenge, initialSkill = '', onChallengeComp
                   <span>Retry & Correct Flaw</span>
                 </button>
                 <button
-                  onClick={loadNextChallenge}
+                  onClick={() => loadNextChallenge(selectedSkill)}
                   className="flex-1 py-3.5 px-4 bg-mentor-accent hover:brightness-110 text-black text-xs md:text-sm font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg"
                 >
                   <span>Next Challenge</span>

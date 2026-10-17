@@ -14,6 +14,7 @@ import mem from './memory_visualization.json';
 import learn from './learning_ability.json';
 import creat from './creativity.json';
 import disc from './discipline_execution.json';
+import spanish from './spanish.json';
 
 export const ALL_SKILLS: Skill[] = [
   comm as unknown as Skill,
@@ -31,6 +32,7 @@ export const ALL_SKILLS: Skill[] = [
   learn as unknown as Skill,
   creat as unknown as Skill,
   disc as unknown as Skill,
+  spanish as unknown as Skill,
 ];
 
 export function getSkillById(id: string): Skill | undefined {
