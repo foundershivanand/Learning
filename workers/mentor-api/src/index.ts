@@ -67,7 +67,8 @@ export function formatDrillHistoryContext(attempts: AttemptWithChallenge[]): str
       ? `Duration: ${ev.metrics.durationSeconds}s, Word Count: ${ev.metrics.wordCount}, WPM: ${ev.metrics.wordsPerMinute}, Filler Count: ${ev.metrics.fillerWordCount} (${JSON.stringify(ev.metrics.detectedFillers || {})})` 
       : 'N/A';
 
-    return `[DRILL #${idx + 1}] Date: ${date}
+    const isLatest = idx === 0 ? ' (MOST RECENT / LATEST ATTEMPT)' : '';
+    return `[DRILL #${idx + 1}${isLatest}] Date: ${date}
 - Title: "${title}"
 - Skill Domain: ${skill} | Difficulty: ${ch?.difficulty || 50} | Type: ${ch?.type || 'DRILL'}
 - Result: ${score}
@@ -516,8 +517,8 @@ HISTORICAL DRILL LOGS & REAL ATTEMPTS (${recentAttempts.length} logged):
 ${drillHistoryText}
 
 INSTRUCTIONS FOR MENTOR SPARRING & ACCOUNTABILITY:
-1. You have complete, transparent access to the user's past drill history above.
-2. When the user asks what drills they have taken, how they performed, what their score was, or why they failed, reference these exact drills, their scores, specific quotes from their transcripts, and identified flaws directly. Never claim that you don't have access to their drill logs.
+1. You have complete, transparent access to the user's past drill history above. Drills are listed in reverse chronological order: [DRILL #1] is the user's latest/most recent attempt.
+2. When the user asks what drills they have taken, what they answered last, how they performed, what their score was, or why they failed, reference these exact drills, their scores, specific quotes from their transcripts, and identified flaws directly. Never claim that you don't have access to their drill logs.
 3. Call out their recurring patterns, incoherence, filler words, or failure to follow structure without sugarcoating.
 4. If they try to rationalize, push back immediately with their concrete attempt evidence.
 5. Tone: Direct, demanding, serious, and concise. No generic pleasantries. Call out hesitation and excuses immediately.`;
