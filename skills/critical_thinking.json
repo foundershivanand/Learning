@@ -1,0 +1,35 @@
+{
+  "id": "critical_thinking",
+  "name": "Critical Thinking",
+  "category": "cognition",
+  "description": "Logic validity, cognitive bias detection, assumption unbundling, and first-principles analysis.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "crit_fallacy_detection",
+      "skillId": "critical_thinking",
+      "name": "Fallacy & Bias Detection",
+      "description": "Spotting ad hominem, straw man, false dichotomy, sunk cost, and confirmation bias.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Instantly spots hidden fallacies in opponent's premise and exposes non-sequiturs.",
+        "70-89": "Identifies primary logical flaw with minor delay or slight semantic confusion.",
+        "50-69": "Fails to notice subtler biases; seduced by emotional rhetoric.",
+        "0-49": "Employs logical fallacies in own arguments; easily misled."
+      }
+    },
+    {
+      "id": "crit_first_principles",
+      "skillId": "critical_thinking",
+      "name": "First-Principles Reasoning",
+      "description": "Boiling systems down to fundamental truths and reasoning up from there rather than by analogy.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Strips away conventional dogma; derives innovative conclusions from physics/axioms.",
+        "70-89": "Deconstructs assumptions well but retains a few unexamined axioms.",
+        "50-69": "Relies heavily on industry precedent ('This is how it has always been done').",
+        "0-49": "Pure herd mentality; uncritically accepts surface assertions."
+      }
+    }
+  ]
+}

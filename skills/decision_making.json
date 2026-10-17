@@ -1,0 +1,35 @@
+{
+  "id": "decision_making",
+  "name": "Decision Making",
+  "category": "cognition",
+  "description": "Expected value calculations, reversibility assessment (Type 1 vs Type 2), and speed under uncertainty.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "dec_reversibility_speed",
+      "skillId": "decision_making",
+      "name": "Reversibility & Speed (Type 1 / Type 2)",
+      "description": "Making fast two-way door decisions rapidly while slowing down for irreversible one-way doors.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Accurately categorizes door reversibility; commits quickly with 70% information.",
+        "70-89": "Decisive with slight over-analysis on minor reversible matters.",
+        "50-69": "Slows down on easily reversible choices; exhibits analysis paralysis.",
+        "0-49": "Treats two-way doors like permanent decisions; stalls all momentum."
+      }
+    },
+    {
+      "id": "dec_asymmetric_upside",
+      "skillId": "decision_making",
+      "name": "Asymmetric Risk/Reward Analysis",
+      "description": "Limiting catastrophic downside while maximizing uncapped upside potential.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Calculates convex payoff profiles; caps downside risk strictly.",
+        "70-89": "Good risk-weighted decision with minor exposure to tail risk.",
+        "50-69": "Takes on hidden existential risks for meager linear rewards.",
+        "0-49": "Gambles on high-risk, low-reward outcomes without hedges."
+      }
+    }
+  ]
+}

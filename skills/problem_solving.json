@@ -1,0 +1,35 @@
+{
+  "id": "problem_solving",
+  "name": "Problem Solving",
+  "category": "cognition",
+  "description": "Systematic decomposition (MECE), root cause identification (5-Whys), and constraint optimization.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "prob_mece_decomposition",
+      "skillId": "problem_solving",
+      "name": "MECE Decomposition",
+      "description": "Mutually Exclusive, Collectively Exhaustive issue trees breaking intractable issues down.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Flawless issue tree; zero overlap between branches, leaves no blind spots.",
+        "70-89": "Strong decomposition with minor overlap or slight omission.",
+        "50-69": "Messy categorization; confuses symptoms with root causes.",
+        "0-49": "Chaotic, unstructured brainstorming without hierarchy."
+      }
+    },
+    {
+      "id": "prob_root_cause",
+      "skillId": "problem_solving",
+      "name": "Root Cause Analysis (5-Whys)",
+      "description": "Drilling past superficial symptoms to uncover underlying systemic failure.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Penetrates to true systemic root cause; proposes irreversible structural fix.",
+        "70-89": "Finds operational root cause but misses cultural/incentive misalignment.",
+        "50-69": "Fixates on proximate symptom rather than underlying driver.",
+        "0-49": "Applies band-aid to superficial manifestation; problem immediately recurs."
+      }
+    }
+  ]
+}

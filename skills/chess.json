@@ -1,0 +1,48 @@
+{
+  "id": "chess",
+  "name": "Chess",
+  "category": "tactics",
+  "description": "Tactical calculation depth, candidate move selection, blunder prevention, and positional prophylaxis.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "chess_tactical_depth",
+      "skillId": "chess",
+      "name": "Tactical Calculation Depth",
+      "description": "Calculating forcing lines (checks, captures, threats) 3-5 moves ahead with tree pruning.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Calculates complete forcing variation without overlooking intermediate checks (zwischenzug).",
+        "70-89": "Finds key tactic but misses quiet defensive resource or cleanest finish.",
+        "50-69": "Calculates only 1-2 moves deep; misses opponent's counter-threat.",
+        "0-49": "Calculational hallucination; assumes opponent makes cooperative moves."
+      }
+    },
+    {
+      "id": "chess_blunder_prevention",
+      "skillId": "chess",
+      "name": "Blunder Prevention & Prophylaxis",
+      "description": "Rigorous sanity checks before committing to a move; spotting opponent's sneaky threats.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Checks all opponent replies before moving; identifies prophylaxis targets.",
+        "70-89": "Solid safety check with occasional slight positional concession.",
+        "50-69": "Allows tactical fork or pin that weakens pawn structure.",
+        "0-49": "Hangs piece or falls into direct 1-move/2-move tactic."
+      }
+    },
+    {
+      "id": "chess_positional_strategy",
+      "skillId": "chess",
+      "name": "Positional Evaluation & Outposts",
+      "description": "Pawn structure, piece coordination, open files, king safety, weak squares.",
+      "weight": 1.1,
+      "rubricCriteria": {
+        "90-100": "Accurate long-term strategic plan; occupies critical outposts; restricts enemy pieces.",
+        "70-89": "Good piece development; reasonable plan with slight tactical inaccuracies.",
+        "50-69": "Passive piece placement; allows opponent to dictate tempo.",
+        "0-49": "Damages own pawn structure unnecessarily; leaves king vulnerable."
+      }
+    }
+  ]
+}

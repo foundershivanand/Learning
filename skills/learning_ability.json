@@ -1,0 +1,35 @@
+{
+  "id": "learning_ability",
+  "name": "Learning Ability",
+  "category": "cognition",
+  "description": "Feynman technique (teaching back simply), rapid concept extraction, analogical reasoning, and retention.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "learn_feynman_synthesis",
+      "skillId": "learning_ability",
+      "name": "Feynman Simplification",
+      "description": "Explaining complex technical or philosophical ideas to a novice without hiding behind jargon.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Distills dense academic concept into intuitive, everyday physical metaphor.",
+        "70-89": "Clear explanation with 1-2 minor pieces of un-demystified jargon.",
+        "50-69": "Hides lack of understanding behind complex vocabulary.",
+        "0-49": "Parrots textbook definitions verbatim without real comprehension."
+      }
+    },
+    {
+      "id": "learn_retention_spaced",
+      "skillId": "learning_ability",
+      "name": "Spaced Recall & Application",
+      "description": "Recalling previously learned concepts under pressure and applying them to alien scenarios.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Instant transfer of mental model from past lessons to completely new domain.",
+        "70-89": "Recalls core framework after short prompting.",
+        "50-69": "Remembers name of framework but botches practical implementation.",
+        "0-49": "Total amnesia of concepts taught within the last 7 days."
+      }
+    }
+  ]
+}

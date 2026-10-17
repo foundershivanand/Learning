@@ -1,0 +1,35 @@
+{
+  "id": "business_strategy",
+  "name": "Business Strategy",
+  "category": "business",
+  "description": "Competitive dynamics, sustainable moats, market positioning, and capital allocation.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "strat_moat_analysis",
+      "skillId": "business_strategy",
+      "name": "Competitive Moats & Defensibility",
+      "description": "Network effects, switching costs, scale economies, brand, and proprietary technology.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Identifies true structural defensibility; anticipates incumbent response.",
+        "70-89": "Identifies defensibility factors with minor vulnerability to substitutes.",
+        "50-69": "Confuses operational excellence or first-mover speed with a permanent moat.",
+        "0-49": "Zero defensibility; commodity business model easily cloned."
+      }
+    },
+    {
+      "id": "strat_tradeoffs",
+      "skillId": "business_strategy",
+      "name": "Strategic Trade-offs & Focus",
+      "description": "Defining what NOT to do; maintaining focus despite tempting distractions.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Articulates explicit sacrifices required to win target market segment.",
+        "70-89": "Solid prioritization with slight reluctance to kill low-ROI ideas.",
+        "50-69": "Tries to be everything to everyone; dilutes resources.",
+        "0-49": "Chases every shiny opportunity; lacks strategic direction."
+      }
+    }
+  ]
+}

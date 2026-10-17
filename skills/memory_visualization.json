@@ -1,0 +1,35 @@
+{
+  "id": "memory_visualization",
+  "name": "Memory & Visualization",
+  "category": "cognition",
+  "description": "Blindfold chess board visualization, spatial mental models, working memory capacity, and recall.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "mem_blindfold_coords",
+      "skillId": "memory_visualization",
+      "name": "Blindfold Board & Coordinates",
+      "description": "Instantly identifying square colors (e.g., e4 is dark), diagonal intersections, and knight paths.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Instant recall of square colors, diagonal trajectories, and 3-step knight routes.",
+        "70-89": "Accurate calculation within 2 seconds of mental pause.",
+        "50-69": "Struggles with board orientation; confuses ranks and files.",
+        "0-49": "Complete spatial disorientation; cannot visualize square colors or paths."
+      }
+    },
+    {
+      "id": "mem_piece_tracking",
+      "skillId": "memory_visualization",
+      "name": "Blindfold Piece Tracking",
+      "description": "Tracking moves without a physical board over 5-10 move sequences without losing piece states.",
+      "weight": 1.5,
+      "rubricCriteria": {
+        "90-100": "Tracks multiple moving pieces across 8+ plies without losing square occupancy.",
+        "70-89": "Maintains position up to 5 moves before needing a position recap.",
+        "50-69": "Loses track of subtle piece displacements after 3 moves.",
+        "0-49": "Visualization breaks down after 1-2 moves; ghost pieces hallucinated."
+      }
+    }
+  ]
+}

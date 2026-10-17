@@ -1,0 +1,35 @@
+{
+  "id": "leadership",
+  "name": "Leadership",
+  "category": "execution",
+  "description": "Radical candor feedback, delegation clarity, alignment under stress, and accountability enforcement.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "lead_radical_candor",
+      "skillId": "leadership",
+      "name": "Radical Candor & Feedback",
+      "description": "Direct, empathetic, uncompromising critique without ruinous empathy or obnoxious aggression.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Directly addresses poor performance with compassion and objective examples; clears air.",
+        "70-89": "Constructive feedback delivered well with slight sugar-coating.",
+        "50-69": "Ruinous empathy: withholds hard truth to avoid uncomfortable tension.",
+        "0-49": "Passive-aggressive evasion or toxic demoralizing outburst."
+      }
+    },
+    {
+      "id": "lead_delegation_clarity",
+      "skillId": "leadership",
+      "name": "Delegation & Outcome Ownership",
+      "description": "Defining 'What done looks like', context, constraints, and deadline without micromanagement.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Delegates ownership not tasks; sets clear success metrics and check-in cadence.",
+        "70-89": "Good task delegation with minor ambiguity on edge-case scenarios.",
+        "50-69": "Vague instructions followed by frustration when result misses expectations.",
+        "0-49": "Dumps tasks without context or micromanages every keystroke."
+      }
+    }
+  ]
+}

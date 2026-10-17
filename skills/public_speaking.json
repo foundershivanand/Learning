@@ -1,0 +1,35 @@
+{
+  "id": "public_speaking",
+  "name": "Public Speaking",
+  "category": "communication",
+  "description": "Stage presence, executive opening hook, vocal modulation, audience retention, and closing impact.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "pub_hook_opening",
+      "skillId": "public_speaking",
+      "name": "Opening Hook & Retention",
+      "description": "Capturing undivided audience attention within the first 15 seconds without platitudes.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Electrifying opening story, counter-intuitive insight, or provocative question.",
+        "70-89": "Strong opening with minor conventional pleasantries ('Thank you for having me').",
+        "50-69": "Generic, polite throat-clearing; audience attention wanes.",
+        "0-49": "Boring administrative monologue; loses room immediately."
+      }
+    },
+    {
+      "id": "pub_vocal_variety",
+      "skillId": "public_speaking",
+      "name": "Vocal Modulation & Projection",
+      "description": "Dynamic volume, pitch variation, deliberate dramatic pauses, resonance.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Masterful dynamic range; uses quiet pauses to command total silence; energetic peaks.",
+        "70-89": "Good vocal energy with occasional monotone stretches.",
+        "50-69": "Monotone delivery; rushes through critical punchlines.",
+        "0-49": "Mumbles, speaks in low monotone, or sounds robotic and detached."
+      }
+    }
+  ]
+}

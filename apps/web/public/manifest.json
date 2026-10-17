@@ -1,0 +1,16 @@
+{
+  "name": "AI Mentor Operating System",
+  "short_name": "AI Mentor",
+  "description": "Adversarial Personal Skill-Development Engine",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090a0f",
+  "theme_color": "#090a0f",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

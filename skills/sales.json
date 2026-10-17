@@ -1,0 +1,48 @@
+{
+  "id": "sales",
+  "name": "Sales",
+  "category": "business",
+  "description": "Discovery questioning, consultative pitch, objection handling, and executive closing.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "sales_discovery",
+      "skillId": "sales",
+      "name": "Discovery Questioning",
+      "description": "Uncovering budget, decision-making authority, pain intensity, and timeline.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Deep open-ended questions; diagnoses before prescribing; prospect does 70% of talking.",
+        "70-89": "Good diagnostic flow with minor premature pitching.",
+        "50-69": "Interrogative or superficial; misses core business driver.",
+        "0-49": "Immediately pitches product without understanding prospect's situation."
+      }
+    },
+    {
+      "id": "sales_objection_handling",
+      "skillId": "sales",
+      "name": "Objection Rebuttal",
+      "description": "Reframing price, competitor, and timing objections with empathy and economic proof.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Validates concern, isolates real objection, reframes around ROI and risk.",
+        "70-89": "Answers objection directly but misses deeper underlying hesitation.",
+        "50-69": "Becomes argumentative or offers discounts too early.",
+        "0-49": "Accepts objection passively or capitulates on price."
+      }
+    },
+    {
+      "id": "sales_closing",
+      "skillId": "sales",
+      "name": "Closing & Next Steps",
+      "description": "Securing clear next steps, dates, and commitments without being pushy or passive.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Clear reciprocal agreement; locks calendar date and agenda for mutual action plan.",
+        "70-89": "Agrees to next meeting but leaves exact date or deliverables open.",
+        "50-69": "Passive 'Let me know if you have questions' sign-off.",
+        "0-49": "No call-to-action; allows call to fizzle into dead silence."
+      }
+    }
+  ]
+}

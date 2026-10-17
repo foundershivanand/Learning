@@ -1,0 +1,74 @@
+{
+  "id": "communication",
+  "name": "Communication",
+  "category": "communication",
+  "description": "Clarity, fluency, articulation, vocabulary, structure, and verbal persuasion under constraints.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "comm_clarity",
+      "skillId": "communication",
+      "name": "Clarity",
+      "description": "Precision of phrasing, absence of vagueness, immediate intelligibility.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Crystal clear, unambiguous, precise terminology, zero cognitive burden on listener.",
+        "70-89": "Generally clear, minor ambiguity or slight circuitous phrasing.",
+        "50-69": "Vague in places, listener must guess intended meaning.",
+        "0-49": "Muddy, confusing, incoherent or contradictory."
+      }
+    },
+    {
+      "id": "comm_fluency",
+      "skillId": "communication",
+      "name": "Fluency & Cadence",
+      "description": "Smooth vocal delivery, minimal filler words (like, basically, you know), natural pauses.",
+      "weight": 1.1,
+      "rubricCriteria": {
+        "90-100": "Zero filler words, deliberate rhythmic pauses, 130-160 WPM cadence.",
+        "70-89": "1-2 filler words, slight hesitation, good general pacing.",
+        "50-69": "3-5 filler words, awkward pauses, rushed or dragging tempo.",
+        "0-49": "6+ filler words, persistent vocal stalling, severe cadence disruption."
+      }
+    },
+    {
+      "id": "comm_structure",
+      "skillId": "communication",
+      "name": "Logical Structure",
+      "description": "Executive hook, clear thesis, 2-3 distinct supporting arguments, firm conclusion.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Impeccable architecture (Pyramid Principle), logical transitions, tight conclusion.",
+        "70-89": "Clear beginning, middle, and end, but transitions are abrupt.",
+        "50-69": "Meandering path, main point delayed or buried in details.",
+        "0-49": "Total stream-of-consciousness, rambling, no discernible structure."
+      }
+    },
+    {
+      "id": "comm_conciseness",
+      "skillId": "communication",
+      "name": "Conciseness & High Signal",
+      "description": "Maximum information density per word, zero fluff, tight time limit adherence.",
+      "weight": 1.0,
+      "rubricCriteria": {
+        "90-100": "Surgical density; every single sentence advances the thesis.",
+        "70-89": "Trim with minor repetition or redundant adjectives.",
+        "50-69": "Excessive padding, repeated points, over-explains simple concepts.",
+        "0-49": "Bloated, repetitive, fails to complete within time constraint."
+      }
+    },
+    {
+      "id": "comm_improvisation",
+      "skillId": "communication",
+      "name": "Improvisation & Composure",
+      "description": "Ability to think on feet, handle sudden constraints or hostile interruptions calmly.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Composed under sudden curveballs, pivots seamlessly without stalling.",
+        "70-89": "Brief hesitation before recovering strong posture and argument.",
+        "50-69": "Visibly rattled, loses train of thought for >5 seconds.",
+        "0-49": "Freezes, becomes defensive or concedes point inadvertently."
+      }
+    }
+  ]
+}

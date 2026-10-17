@@ -1,0 +1,17 @@
+{
+  "name": "personal-ai-mentor-os",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Private, Adversarial Skill-Development AI Mentor Operating System",
+  "type": "module",
+  "scripts": {
+    "dev:api": "pnpm --filter mentor-api dev",
+    "dev:web": "pnpm --filter mentor-web dev",
+    "build": "pnpm --recursive build",
+    "test": "pnpm --recursive test"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.13.4"
+  }
+}

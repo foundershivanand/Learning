@@ -1,0 +1,35 @@
+{
+  "id": "creativity",
+  "name": "Creativity",
+  "category": "cognition",
+  "description": "Lateral thinking, idea generation under extreme constraint, analogy synthesis, and novelty.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "creat_constraint_ideation",
+      "skillId": "creativity",
+      "name": "Ideation Under Constraints",
+      "description": "Generating 10 non-obvious solutions when normal tools or capital are banned.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Turns harsh constraint into the primary competitive advantage; highly original.",
+        "70-89": "Multiple creative workarounds with minor conventional spillover.",
+        "50-69": "Offers cliché or derivative answers that barely circumvent constraints.",
+        "0-49": "Complains about constraints; fails to generate viable alternatives."
+      }
+    },
+    {
+      "id": "creat_lateral_synthesis",
+      "skillId": "creativity",
+      "name": "Cross-Domain Lateral Synthesis",
+      "description": "Borrowing mechanisms from biology, physics, or game theory to solve commercial problems.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Brilliant cross-pollination; maps mechanics from unrelated domain seamlessly.",
+        "70-89": "Good analogical reasoning with slight stretching of domain logic.",
+        "50-69": "Superficial comparison without operational transferability.",
+        "0-49": "Inability to look beyond immediate industry boundaries."
+      }
+    }
+  ]
+}

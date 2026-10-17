@@ -1,0 +1,61 @@
+{
+  "id": "entrepreneurship",
+  "name": "Entrepreneurship",
+  "category": "business",
+  "description": "Opportunity identification, customer problem validation, unit economics, and execution velocity.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "ent_problem_validation",
+      "skillId": "entrepreneurship",
+      "name": "Problem Validation",
+      "description": "Distinguishing urgent, hair-on-fire problems from nice-to-haves; identifying willingness to pay.",
+      "weight": 1.3,
+      "rubricCriteria": {
+        "90-100": "Pinpoints exact workflow friction, quantifiable customer loss, proven willingness to pay.",
+        "70-89": "Identifies real problem but evidence of willingness to pay is theoretical.",
+        "50-69": "Solution in search of a problem; vague buyer persona.",
+        "0-49": "Hallucinated problem; no economic pain point identified."
+      }
+    },
+    {
+      "id": "ent_unit_economics",
+      "skillId": "entrepreneurship",
+      "name": "Unit Economics & Viability",
+      "description": "CAC, LTV, gross margins, payback period, churn estimation, and operational levers.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Realistic CAC/LTV calculus, margin protection, clear path to cash-flow positive.",
+        "70-89": "Solid unit math with minor unaddressed operational costs.",
+        "50-69": "Unrealistic CAC assumptions or flawed margin calculations.",
+        "0-49": "Ignores cost of goods, distribution friction, or math violates basic business physics."
+      }
+    },
+    {
+      "id": "ent_execution_velocity",
+      "skillId": "entrepreneurship",
+      "name": "Execution Velocity & MVP",
+      "description": "Ability to de-risk assumptions in 48 hours with minimal software and brutal prioritization.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Cuts scope ruthlessly; designs a rapid, zero-bloat smoke test or prototype in days.",
+        "70-89": "Good MVP plan with slight tendency toward premature feature building.",
+        "50-69": "Over-engineers early version; takes months to test simple assumption.",
+        "0-49": "Paralysis by analysis; plans full product before any customer validation."
+      }
+    },
+    {
+      "id": "ent_distribution",
+      "skillId": "entrepreneurship",
+      "name": "Distribution & GTM Strategy",
+      "description": "Non-obvious acquisition channels, cold outbound loops, programmatic SEO, virality mechanics.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Specific, scalable distribution moat identified with low CAC entry point.",
+        "70-89": "Viable standard marketing channels with clear execution steps.",
+        "50-69": "Relies on generic 'social media' or 'word of mouth' without mechanics.",
+        "0-49": "'Build it and they will come' fantasy; no distribution hypothesis."
+      }
+    }
+  ]
+}

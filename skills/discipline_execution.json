@@ -1,0 +1,35 @@
+{
+  "id": "discipline_execution",
+  "name": "Discipline & Execution",
+  "category": "execution",
+  "description": "Daily habit consistency, resistance to procrastination, follow-through under stress, and anti-avoidance.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "disc_anti_avoidance",
+      "skillId": "discipline_execution",
+      "name": "Resistance to Avoidance",
+      "description": "Tackling the most uncomfortable or humiliating weakness drill first without rationalizing delays.",
+      "weight": 1.5,
+      "rubricCriteria": {
+        "90-100": "Attacks highest-friction weakness immediately; zero excuses.",
+        "70-89": "Completes drill with minor hesitation or procrastination.",
+        "50-69": "Postpones corrective drill to end of day or asks for easier alternatives.",
+        "0-49": "Blatant avoidance; fabricates excuses to skip difficult challenges."
+      }
+    },
+    {
+      "id": "disc_streak_adherence",
+      "skillId": "discipline_execution",
+      "name": "Daily Operating Rhythm",
+      "description": "Maintaining non-negotiable daily training baseline regardless of mood, fatigue, or schedule.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Never misses a day; completes planned minutes with maximum intensity.",
+        "70-89": "Consistent daily practice with occasional reduced duration.",
+        "50-69": "Erratic attendance (trains hard 2 days, goes missing for 3 days).",
+        "0-49": "Total lack of discipline; abandons system after initial novelty wears off."
+      }
+    }
+  ]
+}

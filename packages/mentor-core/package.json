@@ -1,0 +1,21 @@
+{
+  "name": "@personal-mentor/core",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "node --test dist/**/*.test.js || tsx --test src/**/*.test.ts || bun test"
+  },
+  "dependencies": {
+    "@personal-mentor/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.13.4"
+  }
+}

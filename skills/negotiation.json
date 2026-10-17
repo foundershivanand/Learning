@@ -1,0 +1,48 @@
+{
+  "id": "negotiation",
+  "name": "Negotiation",
+  "category": "business",
+  "description": "Tactical empathy, anchoring, concession management, BATNA preservation, and emotional control.",
+  "active": true,
+  "dimensions": [
+    {
+      "id": "neg_anchoring_framing",
+      "skillId": "negotiation",
+      "name": "Anchoring & Framing",
+      "description": "Setting psychological anchor, framing terms around mutual value, controlling baseline.",
+      "weight": 1.2,
+      "rubricCriteria": {
+        "90-100": "Anchors strategically with objective justification; controls terms of debate.",
+        "70-89": "Reasonable anchor, slight hesitation when counter-anchored.",
+        "50-69": "Accepts counterparty's hostile anchor without pushback.",
+        "0-49": "Bids against self; makes concessions before counterparty even asks."
+      }
+    },
+    {
+      "id": "neg_concession_tradeoffs",
+      "skillId": "negotiation",
+      "name": "Concession Trading (If-Then)",
+      "description": "Never giving anything away for free; demanding reciprocal value for every shift.",
+      "weight": 1.4,
+      "rubricCriteria": {
+        "90-100": "Strict 'If we do X, you must do Y' trade-offs; protects key commercial terms.",
+        "70-89": "Trades concessions well but gives away minor points without equivalent return.",
+        "50-69": "Gives away price or scope unilaterally to be 'polite'.",
+        "0-49": "Total capitulation under minimal pressure."
+      }
+    },
+    {
+      "id": "neg_tactical_empathy",
+      "skillId": "negotiation",
+      "name": "Tactical Empathy & Calibrated Questions",
+      "description": "Using 'How' and 'What' calibrated questions; labeling counterpart's unspoken fears.",
+      "weight": 1.1,
+      "rubricCriteria": {
+        "90-100": "Masterful mirroring and labeling; turns adversary into joint problem-solver.",
+        "70-89": "Good listening; asks productive questions with minor defensiveness.",
+        "50-69": "Interrupts counterparty; focuses only on own demands.",
+        "0-49": "Hostile, antagonistic; creates unnecessary impasse."
+      }
+    }
+  ]
+}
