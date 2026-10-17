@@ -19,6 +19,7 @@ import {
 import { AIRouter } from '@personal-mentor/ai-router';
 import { globalStore } from './store.js';
 import { TursoMentorStore } from './turso-store.js';
+import { renderDashboardHtml } from './ui.js';
 
 export interface Env {
   AI?: any;
@@ -83,6 +84,16 @@ export default {
     });
 
     try {
+      // 0. Serve Interactive Web Dashboard for root and non-API requests
+      if (request.method === 'GET' && (!path.startsWith('/api') || path === '/')) {
+        return new Response(renderDashboardHtml(), {
+          headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+            ...CORS_HEADERS,
+          },
+        });
+      }
+
       // 1. Health Check
       if (path === '/api/health') {
         return jsonResponse({
