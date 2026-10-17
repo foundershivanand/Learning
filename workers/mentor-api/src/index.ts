@@ -296,11 +296,13 @@ Commands:
         } else if (text === '/today') {
           const debt = TrainingDebtEngine.calculateSummary(globalStore.debts);
           const topW = globalStore.weaknesses.find(w => w.status !== 'RESOLVED');
+          const skills = globalStore.getSkillsOverview();
+          const avgLevel = (skills.reduce((acc, s) => acc + s.overallLevel + s.overallSublevel / 10, 0) / Math.max(1, skills.length)).toFixed(1);
           replyText = `📅 *TODAY'S BRIEFING*
-• Level: 4.7 | Streak: ${globalStore.gamification.currentStreakDays} Days
+• Level: ${avgLevel} | Streak: ${globalStore.gamification.currentStreakDays} Days
 • Target: 25 Minutes Training
-• Focus: Communication & Fluidity
-• Priority Weakness: ${topW ? topW.description : 'None'}
+• Focus: Communication & Articulation
+• Priority Weakness: ${topW ? topW.description : 'None detected yet'}
 • Training Debt: ${debt.totalActiveDebtPoints} Points (${debt.mandatoryDrillsCount} drills required)`;
         } else if (text === '/debt') {
           const debt = TrainingDebtEngine.calculateSummary(globalStore.debts);

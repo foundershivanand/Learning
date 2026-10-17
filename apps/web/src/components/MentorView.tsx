@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Send, ShieldAlert, Sparkles, User, Bot } from 'lucide-react';
+import { Send, ShieldAlert, Sparkles, User, Bot, Loader2 } from 'lucide-react';
+import { ApiClient } from '../lib/api-client';
 
 interface ChatMessage {
   id: string;
@@ -22,8 +23,8 @@ export function MentorView() {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
-  const handleSendMessage = () => {
-    if (!inputText.trim()) return;
+  const handleSendMessage = async () => {
+    if (!inputText.trim() || isTyping) return;
 
     const userMsg: ChatMessage = {
       id: `usr-${Date.now()}`,
@@ -32,30 +33,32 @@ export function MentorView() {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    const newHistory = [...messages, userMsg];
+    setMessages(newHistory);
     setInputText('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      let reply = 'You are over-explaining. Condense that thought into one single premise. Why did you hesitate during your last challenge?';
-      if (userMsg.text.toLowerCase().includes('tired') || userMsg.text.toLowerCase().includes('busy')) {
-        reply = 'Excuses do not reduce the performance gap. High-stakes situations do not pause for your fatigue. Execute a 60-second micro-drill right now or log +1 training debt.';
-      } else if (userMsg.text.toLowerCase().includes('chess')) {
-        reply = 'Your tactical calculation is acceptable, but your blindfold visualization breaks down after move 4. Stop moving impulsively. Calculate forcing candidate moves: checks, captures, threats.';
-      } else if (userMsg.text.toLowerCase().includes('communication')) {
-        reply = 'Your sentence length is too long. When under pressure, you default to verbal crutches ("basically", "like"). In your next attempt, hold silence instead of filling pauses.';
-      }
+    try {
+      const historyPayload = newHistory.map(m => ({
+        role: m.sender === 'user' ? ('user' as const) : ('assistant' as const),
+        content: m.text,
+      }));
+
+      const replyText = await ApiClient.sendChatMessage(historyPayload);
 
       const mentorMsg: ChatMessage = {
         id: `men-${Date.now()}`,
         sender: 'mentor',
-        text: reply,
+        text: replyText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
       setMessages(prev => [...prev, mentorMsg]);
+    } catch (e) {
+      console.error('Chat error:', e);
+    } finally {
       setIsTyping(false);
-    }, 600);
+    }
   };
 
   return (
@@ -134,10 +137,10 @@ export function MentorView() {
           />
           <button
             type="submit"
-            disabled={!inputText.trim()}
+            disabled={!inputText.trim() || isTyping}
             className="p-2.5 rounded-xl bg-mentor-accent text-black disabled:opacity-30 disabled:pointer-events-none hover:brightness-110 active:scale-95 transition-all"
           >
-            <Send size={15} />
+            {isTyping ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
           </button>
         </form>
       </div>

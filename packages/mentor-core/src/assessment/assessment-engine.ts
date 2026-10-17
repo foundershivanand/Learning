@@ -4,7 +4,7 @@ import {
   DimensionEvaluation, 
   SpeechMetrics 
 } from '@personal-mentor/shared';
-import { SpeechAnalyzer } from '../speech/speech-analyzer.js';
+import { SpeechAnalyzer } from '../speech/speech-analyzer';
 
 export interface RawAssessmentResult {
   dimensionScores: {

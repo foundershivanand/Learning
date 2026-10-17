@@ -9,7 +9,7 @@ import {
   RealityMission
 } from '@personal-mentor/shared';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 export class ApiClient {
   public static async getToday(): Promise<TodayDashboardResponse> {
@@ -82,13 +82,13 @@ export class ApiClient {
       evaluation: {
         attemptId: `att-local-${Date.now()}`,
         challengeId: payload.challengeId,
-        overallScore: 68,
+        overallScore: 55,
         passed: false,
         dimensionScores: [
           {
             dimensionId: 'comm_clarity',
-            name: 'Clarity',
-            score: 68,
+            name: 'Clarity & High Signal',
+            score: 55,
             passed: false,
             evidenceQuotes: [payload.responseText?.slice(0, 60) || ''],
             identifiedMistakes: ['Rushed conclusion', 'Did not clearly state 3-part framework'],
@@ -106,22 +106,39 @@ export class ApiClient {
       progressionUpdate: {
         skillId: 'communication',
         dimensionId: 'comm_clarity',
-        previousLevel: 1.2,
-        newLevel: 1.2,
+        previousLevel: 1.1,
+        newLevel: 1.1,
         levelUp: false,
-        previousScore: 58,
-        newScore: 61,
+        previousScore: 50,
+        newScore: 51,
       },
       debtUpdate: {
         pointsDelta: 1,
-        newTotalDebt: 3,
+        newTotalDebt: 1,
       },
       gamificationUpdate: {
-        xpEarned: 95,
-        newTotalXp: 1345,
-        streakDays: 14,
+        xpEarned: 20,
+        newTotalXp: 20,
+        streakDays: 1,
       },
     };
+  }
+
+  public static async sendChatMessage(messages: { role: 'user' | 'assistant'; content: string }[]): Promise<string> {
+    try {
+      const res = await fetch(`${API_BASE}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.response;
+      }
+    } catch (e) {
+      console.warn('Chat API error:', e);
+    }
+    return 'Your execution lacked focus. Cut the fluff, state your thesis directly, and maintain accountability.';
   }
 
   public static async getRealityMission(): Promise<RealityMission> {

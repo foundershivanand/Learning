@@ -46,7 +46,7 @@ export default function App() {
   }
 
   const overallLevel = dashboardData.skillsOverview && dashboardData.skillsOverview.length > 0
-    ? dashboardData.skillsOverview.reduce((acc, s) => acc + s.overallScore, 0) / dashboardData.skillsOverview.length / 10
+    ? dashboardData.skillsOverview.reduce((acc, s) => acc + s.overallLevel + s.overallSublevel / 10, 0) / dashboardData.skillsOverview.length
     : 1.1;
 
   return (
@@ -116,7 +116,7 @@ export default function App() {
 
           {currentTab === 'progress' && (
             <ProgressView
-              weaknesses={dashboardData.primaryWeakness ? [dashboardData.primaryWeakness] : []}
+              weaknesses={dashboardData.weaknesses || (dashboardData.primaryWeakness ? [dashboardData.primaryWeakness] : [])}
               trainingDebt={dashboardData.trainingDebt}
               gamification={dashboardData.gamification}
             />

@@ -27,9 +27,9 @@ export function SkillsView({ skillsOverview }: SkillsViewProps) {
     const summary = skillsOverview?.find(s => s.skill.id === skill.id);
     return {
       ...skill,
-      overallScore: summary ? summary.overallScore : 55,
+      overallScore: summary ? summary.overallScore : 50,
       overallLevel: summary ? summary.overallLevel : 1,
-      overallSublevel: summary ? summary.overallSublevel : 2,
+      overallSublevel: summary ? summary.overallSublevel : 1,
     };
   });
 

@@ -21,7 +21,12 @@ export class AIRouter {
   private config: AIRouterConfig;
 
   constructor(config?: AIRouterConfig) {
-    this.config = config || {};
+    this.config = {
+      groqApiKey: process.env.GROQ_API_KEY,
+      cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+      cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,
+      ...(config || {}),
+    };
   }
 
   /**
@@ -30,8 +35,8 @@ export class AIRouter {
   public async complete(messages: ChatMessage[], jsonMode = false): Promise<string> {
     const prefer = this.config.preferProvider;
 
-    // 1. Try preferred provider if specified
-    if (prefer === 'groq' && this.config.groqApiKey) {
+    // 1. Try Groq (Ultra-fast, high intelligence)
+    if (this.config.groqApiKey) {
       try {
         return await this.callGroq(messages, jsonMode);
       } catch (e) {
@@ -44,20 +49,11 @@ export class AIRouter {
       try {
         return await this.callCloudflareAI(messages);
       } catch (e) {
-        console.warn('Cloudflare Workers AI failed, attempting Groq fallback...', e);
+        console.warn('Cloudflare Workers AI failed...', e);
       }
     }
 
-    // 3. Try Groq
-    if (this.config.groqApiKey) {
-      try {
-        return await this.callGroq(messages, jsonMode);
-      } catch (e) {
-        console.warn('Groq failed...', e);
-      }
-    }
-
-    // 4. Offline / Mock fallback
+    // 3. Offline / Mock fallback
     return this.mockCompletion(messages, jsonMode);
   }
 
@@ -73,6 +69,7 @@ export class AIRouter {
       headers: {
         'Authorization': `Bearer ${this.config.cloudflareApiToken}`,
         'Content-Type': 'application/json',
+        'User-Agent': 'PersonalMentor/1.0',
       },
       body: JSON.stringify({ messages }),
     });
@@ -90,13 +87,14 @@ export class AIRouter {
    */
   private async callGroq(messages: ChatMessage[], jsonMode = false): Promise<string> {
     const url = 'https://api.groq.com/openai/v1/chat/completions';
-    const model = 'llama-3.1-8b-instant';
+    const model = 'qwen/qwen3.8-27b';
 
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.config.groqApiKey}`,
         'Content-Type': 'application/json',
+        'User-Agent': 'PersonalMentor/1.0',
       },
       body: JSON.stringify({
         model,

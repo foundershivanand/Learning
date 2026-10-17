@@ -1,7 +1,7 @@
-import { SkillSummary } from './skills.js';
-import { Weakness } from './weakness.js';
-import { TrainingDebtSummary } from './weakness.js';
-import { GamificationState, DailyPlan } from './gamification.js';
+import { SkillSummary } from './skills';
+import { Weakness } from './weakness';
+import { TrainingDebtSummary } from './weakness';
+import { GamificationState, DailyPlan } from './gamification';
 
 export interface MentorProfile {
   id: string;

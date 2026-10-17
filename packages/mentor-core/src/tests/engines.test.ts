@@ -8,7 +8,7 @@ import {
   ChallengeEngine,
   AssessmentEngine,
   GamificationEngine
-} from '../index.js';
+} from '../index';
 import { SkillState, Weakness, Challenge } from '@personal-mentor/shared';
 
 describe('AI Mentor Core Engines Test Suite', () => {

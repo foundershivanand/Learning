@@ -79,7 +79,7 @@ export function DesktopSidebar({
 
         <div className="mt-1 flex items-center justify-between text-[11px] text-gray-400">
           <span>Tier</span>
-          <span className="text-gray-200 font-semibold">Level 1 — Basic</span>
+          <span className="text-gray-200 font-semibold">Tier {Math.max(1, Math.floor(overallLevel))}</span>
         </div>
 
         {/* Quick Stats Grid */}

@@ -1,8 +1,8 @@
-import { SkillSummary } from './skills.js';
-import { Challenge, Attempt, AttemptEvaluation } from './challenges.js';
-import { Weakness, TrainingDebtSummary } from './weakness.js';
-import { GamificationState, DailyPlan } from './gamification.js';
-import { MentorProfile, RealityMission } from './mentor.js';
+import { SkillSummary } from './skills';
+import { Challenge, Attempt, AttemptEvaluation } from './challenges';
+import { Weakness, TrainingDebtSummary } from './weakness';
+import { GamificationState, DailyPlan } from './gamification';
+import { MentorProfile, RealityMission } from './mentor';
 
 export interface TodayDashboardResponse {
   profile: MentorProfile;
@@ -11,6 +11,7 @@ export interface TodayDashboardResponse {
   activeChallenges: Challenge[];
   trainingDebt: TrainingDebtSummary;
   primaryWeakness: Weakness | null;
+  weaknesses?: Weakness[];
   skillsOverview: SkillSummary[];
 }
 

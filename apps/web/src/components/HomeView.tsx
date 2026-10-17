@@ -32,7 +32,12 @@ export function HomeView({
   onOpenSkills,
   onOpenReality,
 }: HomeViewProps) {
-  const { profile, dailyPlan, gamification, trainingDebt, primaryWeakness } = data;
+  const { profile, dailyPlan, gamification, trainingDebt, primaryWeakness, skillsOverview } = data;
+  const avgLevelNum = skillsOverview && skillsOverview.length > 0
+    ? skillsOverview.reduce((acc, s) => acc + s.overallLevel + s.overallSublevel / 10, 0) / skillsOverview.length
+    : 1.1;
+  const currentLevelStr = `Level ${avgLevelNum.toFixed(1)}`;
+  const tierNumber = Math.max(1, Math.floor(avgLevelNum));
 
   return (
     <div className="flex flex-col gap-6 pb-24 pt-2 max-w-7xl mx-auto w-full">
@@ -42,8 +47,8 @@ export function HomeView({
         <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-mentor-muted">Current Ability Level</span>
-            <div className="text-2xl font-black text-mentor-accent mt-0.5">Level 1.1</div>
-            <div className="text-xs text-gray-400 mt-1">Tier: Level 1 — Basic (Sublevel 1/10)</div>
+            <div className="text-2xl font-black text-mentor-accent mt-0.5">{currentLevelStr}</div>
+            <div className="text-xs text-gray-400 mt-1">Tier: Level {tierNumber} (Sublevel {Math.round((avgLevelNum % 1) * 10)}/10)</div>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-mentor-accent/10 border border-mentor-accent/30 flex items-center justify-center text-mentor-accent">
             <Award size={24} />
