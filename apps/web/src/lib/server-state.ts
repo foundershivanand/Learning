@@ -260,7 +260,7 @@ export class MentorServerStore {
     };
   }
 
-  public async getNextChallenge(): Promise<Challenge> {
+  public async getNextChallenge(requestedSkillId?: string): Promise<Challenge> {
     const skills = this.getSkillsOverview();
     const debtSummary = TrainingDebtEngine.calculateSummary(this.debts);
     
@@ -269,14 +269,75 @@ export class MentorServerStore {
       weaknesses: this.weaknesses,
       trainingDebtPoints: debtSummary.totalActiveDebtPoints,
       recentAttemptsCount: this.attempts.length,
+      requestedSkillId,
     });
 
-    const challenge = ChallengeEngine.generateTemplateChallenge(
+    let challenge = ChallengeEngine.generateTemplateChallenge(
       target.skillId,
       target.dimensionId,
       target.targetDifficulty,
       target.targetWeakness
     );
+
+    try {
+      const skillObj = skills.find(s => s.skill.id === target.skillId)?.skill;
+      const synthPrompt = `You are the master challenge synthesis engine of the AI Performance Mentor.
+Construct a world-class, high-stakes, pressure-tested practical challenge.
+Zero passive essays or kindergarten roleplays. Test the user right at their failure boundary.
+
+SKILL: ${skillObj?.name || target.skillId} (${skillObj?.description || ''})
+DIMENSION ID: ${target.dimensionId}
+DIFFICULTY LEVEL: ${target.targetDifficulty}/100
+ACTIVE WEAKNESS TO TARGET: ${target.targetWeakness?.description || 'Structural delivery and precision under pressure'}
+TOTAL TRAINING DEBT: ${debtSummary.totalActiveDebtPoints} points
+
+Requirements:
+1. Imposing realistic high-stakes scenario (e.g. enterprise executive boardroom, hostile counterparty, grandmaster candidate calculation, crisis turnaround).
+2. Exactly 2-3 brutal negative constraints (banned words, strict structural requirement, tight time ceiling between 45s and 90s).
+3. If difficulty > 65, introduce adversarial pushback context.
+
+Respond ONLY with valid JSON:
+{
+  "type": "${challenge.type}",
+  "title": string,
+  "instructions": string,
+  "adversaryContext": string | null,
+  "constraints": string[],
+  "timeLimitSeconds": number,
+  "difficulty": ${target.targetDifficulty},
+  "rubric": [
+    {
+      "dimensionId": "${target.dimensionId}",
+      "name": "${challenge.rubric[0]?.name || 'Executive Execution'}",
+      "weight": 1.3,
+      "passThreshold": 75,
+      "evalPrompt": string
+    }
+  ]
+}`;
+
+      const aiResp = await this.aiRouter.complete([
+        { role: 'system', content: 'You are an elite performance training architect. Output valid JSON only.' },
+        { role: 'user', content: synthPrompt },
+      ], true);
+
+      if (aiResp) {
+        const clean = aiResp.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(clean);
+        if (parsed.title && parsed.instructions && parsed.constraints) {
+          challenge = {
+            ...challenge,
+            ...parsed,
+            id: `chal-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            skillId: target.skillId,
+            dimensionId: target.dimensionId,
+            createdAt: new Date().toISOString(),
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Groq challenge synthesis fallback to masterclass template:', err);
+    }
 
     this.challenges.set(challenge.id, challenge);
     return challenge;

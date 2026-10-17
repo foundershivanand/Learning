@@ -24,10 +24,31 @@ import { ApiClient } from '../lib/api-client';
 
 interface TrainViewProps {
   initialChallenge?: Challenge | null;
+  initialSkill?: string;
   onChallengeComplete?: (res: SubmitAttemptResponse) => void;
 }
 
-export function TrainView({ initialChallenge, onChallengeComplete }: TrainViewProps) {
+const SKILL_OPTIONS = [
+  { id: '', label: '🎯 Auto-Target: Weakest Boundary & Active Debt' },
+  { id: 'communication', label: '🗣️ 1. Communication (Executive Pitch & High Signal)' },
+  { id: 'public_speaking', label: '🎙️ 2. Public Speaking (Town Hall Crisis Defense)' },
+  { id: 'sales', label: '💼 3. Sales (Enterprise IT Discovery Under Friction)' },
+  { id: 'negotiation', label: '🤝 4. Negotiation (Chris Voss Tactical Empathy)' },
+  { id: 'entrepreneurship', label: '🚀 5. Entrepreneurship (Kill-Switch Default-Alive Triage)' },
+  { id: 'business_strategy', label: '♟️ 6. Business Strategy (Moat & Counter-Positioning)' },
+  { id: 'critical_thinking', label: '🔬 7. Critical Thinking (First-Principles Deconstruction)' },
+  { id: 'problem_solving', label: '💡 8. Problem Solving (5-Whys Root Cause Deduction)' },
+  { id: 'decision_making', label: '⚖️ 9. Decision Making (Asymmetric Hedging & 1-Way Doors)' },
+  { id: 'leadership', label: '🧑‍💼 10. Leadership (Terminating Toxic High-Performer)' },
+  { id: 'chess', label: '♟️ 11. Chess (Grandmaster 4-Ply Candidate Calculation)' },
+  { id: 'memory_visualization', label: '🧠 12. Memory & Visualization (Blindfold Geometry)' },
+  { id: 'learning_ability', label: '📚 13. Fast Learning (Feynman 10-Year-Old Reduction)' },
+  { id: 'creativity', label: '🎨 14. Creativity (TRIZ Problem Inversion)' },
+  { id: 'discipline_execution', label: '⚡ 15. Discipline & Execution (Anti-Avoidance Protocol)' },
+];
+
+export function TrainView({ initialChallenge, initialSkill = '', onChallengeComplete }: TrainViewProps) {
+  const [selectedSkill, setSelectedSkill] = useState<string>(initialSkill);
   const [challenge, setChallenge] = useState<Challenge | null>(initialChallenge || null);
   const [loadingChallenge, setLoadingChallenge] = useState(!initialChallenge);
   const [isRecording, setIsRecording] = useState(false);
@@ -43,24 +64,29 @@ export function TrainView({ initialChallenge, onChallengeComplete }: TrainViewPr
 
   useEffect(() => {
     if (!initialChallenge) {
-      loadNextChallenge();
+      loadNextChallenge(selectedSkill);
     }
   }, []);
 
-  const loadNextChallenge = async () => {
+  const loadNextChallenge = async (skillToLoad = selectedSkill) => {
     setLoadingChallenge(true);
     setEvaluationResult(null);
     setResponseText('');
     setRecordDuration(0);
     setValidationError(null);
     try {
-      const next = await ApiClient.getNextChallenge();
+      const next = await ApiClient.getNextChallenge(skillToLoad || undefined);
       setChallenge(next);
     } catch (e) {
       console.error(e);
     } finally {
       setLoadingChallenge(false);
     }
+  };
+
+  const handleSkillChange = (newSkill: string) => {
+    setSelectedSkill(newSkill);
+    loadNextChallenge(newSkill);
   };
 
   const startRecording = async () => {
@@ -186,6 +212,41 @@ export function TrainView({ initialChallenge, onChallengeComplete }: TrainViewPr
 
   return (
     <div className="flex flex-col gap-6 pb-24 pt-2 max-w-7xl mx-auto w-full">
+      {/* Skill Focus & Arena Control Bar */}
+      <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-4 shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <span className="text-xs font-black uppercase tracking-wider text-mentor-accent shrink-0 flex items-center gap-1.5">
+            <Zap size={14} />
+            Focus Skill:
+          </span>
+          <div className="relative flex-1 md:w-80">
+            <select
+              value={selectedSkill}
+              onChange={(e) => handleSkillChange(e.target.value)}
+              className="w-full bg-[#090b10] border border-mentor-border text-white text-xs font-bold rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-mentor-accent transition-all cursor-pointer appearance-none pr-8"
+            >
+              {SKILL_OPTIONS.map((opt) => (
+                <option key={opt.id} value={opt.id} className="bg-mentor-surface text-white">
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">
+              ▼
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => loadNextChallenge(selectedSkill)}
+          disabled={loadingChallenge || isSubmitting}
+          className="py-2.5 px-4 rounded-xl bg-mentor-surface border border-mentor-border hover:border-mentor-accent text-xs font-bold text-gray-200 hover:text-white transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
+        >
+          <RotateCcw size={13} />
+          <span>REROLL SCENARIO</span>
+        </button>
+      </div>
+
       {/* Arena Top Navigation Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-mentor-surface border border-mentor-border rounded-2xl p-4 shadow-md">
         <div className="flex items-center gap-3">

@@ -61,6 +61,7 @@ export function renderDashboardHtml(): string {
 
     function App() {
       const [currentTab, setCurrentTab] = useState('home');
+      const [trainSkillId, setTrainSkillId] = useState('');
       const [data, setData] = useState(null);
       const [realityMission, setRealityMission] = useState(null);
       const [showRealityModal, setShowRealityModal] = useState(false);
@@ -237,12 +238,19 @@ export function renderDashboardHtml(): string {
 
               {currentTab === 'train' && (
                 <TrainView
+                  initialSkillId={trainSkillId}
                   onChallengeComplete={() => loadDashboard()}
                 />
               )}
 
               {currentTab === 'skills' && (
-                <SkillsView skills={skills} />
+                <SkillsView 
+                  skills={skills} 
+                  onSelectSkillToTrain={(skillId) => {
+                    setTrainSkillId(skillId);
+                    setCurrentTab('train');
+                  }}
+                />
               )}
 
               {currentTab === 'progress' && (
@@ -462,7 +470,27 @@ export function renderDashboardHtml(): string {
       );
     }
 
-    function TrainView({ onChallengeComplete }) {
+    const SKILL_OPTIONS = [
+      { id: '', label: '🎯 Auto-Target: Weakest Boundary & Active Debt' },
+      { id: 'communication', label: '🗣️ 1. Communication (Executive Pitch & High Signal)' },
+      { id: 'public_speaking', label: '🎙️ 2. Public Speaking (Town Hall Crisis Defense)' },
+      { id: 'sales', label: '💼 3. Sales (Enterprise IT Discovery Under Friction)' },
+      { id: 'negotiation', label: '🤝 4. Negotiation (Chris Voss Tactical Empathy)' },
+      { id: 'entrepreneurship', label: '🚀 5. Entrepreneurship (Kill-Switch Default-Alive Triage)' },
+      { id: 'business_strategy', label: '♟️ 6. Business Strategy (Moat & Counter-Positioning)' },
+      { id: 'critical_thinking', label: '🔬 7. Critical Thinking (First-Principles Deconstruction)' },
+      { id: 'problem_solving', label: '💡 8. Problem Solving (5-Whys Root Cause Deduction)' },
+      { id: 'decision_making', label: '⚖️ 9. Decision Making (Asymmetric Hedging & 1-Way Doors)' },
+      { id: 'leadership', label: '🧑‍💼 10. Leadership (Terminating Toxic High-Performer)' },
+      { id: 'chess', label: '♟️ 11. Chess (Grandmaster 4-Ply Candidate Calculation)' },
+      { id: 'memory_visualization', label: '🧠 12. Memory & Visualization (Blindfold Geometry)' },
+      { id: 'learning_ability', label: '📚 13. Fast Learning (Feynman 10-Year-Old Reduction)' },
+      { id: 'creativity', label: '🎨 14. Creativity (TRIZ Problem Inversion)' },
+      { id: 'discipline_execution', label: '⚡ 15. Discipline & Execution (Anti-Avoidance Protocol)' },
+    ];
+
+    function TrainView({ onChallengeComplete, initialSkillId = '' }) {
+      const [selectedSkill, setSelectedSkill] = useState(initialSkillId);
       const [challenge, setChallenge] = useState(null);
       const [loadingChallenge, setLoadingChallenge] = useState(true);
       const [responseText, setResponseText] = useState('');
@@ -476,17 +504,18 @@ export function renderDashboardHtml(): string {
       const recognitionRef = useRef(null);
 
       useEffect(() => {
-        loadNextChallenge();
+        loadNextChallenge(selectedSkill);
       }, []);
 
-      const loadNextChallenge = async () => {
+      const loadNextChallenge = async (skillToLoad = selectedSkill) => {
         setLoadingChallenge(true);
         setEvaluationResult(null);
         setResponseText('');
         setRecordDuration(0);
         setError(null);
         try {
-          const res = await fetch('/api/challenge/next');
+          const url = skillToLoad ? ('/api/challenge/next?skill=' + encodeURIComponent(skillToLoad)) : '/api/challenge/next';
+          const res = await fetch(url);
           if (res.ok) {
             const ch = await res.json();
             setChallenge(ch);
@@ -496,6 +525,11 @@ export function renderDashboardHtml(): string {
         } finally {
           setLoadingChallenge(false);
         }
+      };
+
+      const handleSkillChange = (newSkill) => {
+        setSelectedSkill(newSkill);
+        loadNextChallenge(newSkill);
       };
 
       const startRecording = () => {
@@ -547,13 +581,16 @@ export function renderDashboardHtml(): string {
         setIsSubmitting(true);
         setError(null);
         try {
+          const wordCount = responseText.trim().split(/\s+/).length;
+          const computedDuration = recordDuration > 0 ? recordDuration : Math.max(15, Math.round(wordCount / 2.3));
+
           const res = await fetch('/api/challenge/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               challengeId: challenge.id,
               responseText: responseText.trim(),
-              audioDurationSeconds: recordDuration > 0 ? recordDuration : 30,
+              audioDurationSeconds: computedDuration,
             }),
           });
 
@@ -561,6 +598,8 @@ export function renderDashboardHtml(): string {
             const result = await res.json();
             setEvaluationResult(result);
             if (onChallengeComplete) onChallengeComplete(result);
+          } else {
+            setError('Evaluation failed. Please retry.');
           }
         } catch (e) {
           setError('Failed to evaluate attempt.');
@@ -569,165 +608,272 @@ export function renderDashboardHtml(): string {
         }
       };
 
-      if (loadingChallenge) {
-        return (
-          <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-mentor-muted">
-            <div className="animate-spin text-mentor-accent text-3xl">⚡</div>
-            <span className="text-sm font-medium">Synthesizing High-Friction Challenge from Turso...</span>
-          </div>
-        );
-      }
-
-      if (!challenge) return null;
+      const wordCount = responseText.trim() ? responseText.trim().split(/\s+/).length : 0;
+      const estSpeechSeconds = Math.round(wordCount / 2.3);
 
       return (
         <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column: Challenge Brief & Constraints */}
-            <div className="lg:col-span-5 flex flex-col gap-5">
-              <div className="bg-mentor-surface border border-mentor-border rounded-3xl p-6 shadow-sm">
-                <div className="flex items-center justify-between text-xs mb-3">
-                  <span className="px-2.5 py-1 rounded bg-mentor-accent/20 border border-mentor-accent/40 text-mentor-accent text-[10px] font-black uppercase">
-                    {challenge.type} • DIFF {challenge.difficulty}
-                  </span>
-                  <span className="text-gray-400 font-bold text-xs">⏱️ {challenge.timeLimitSeconds}s Limit</span>
+          {/* Top Skill Focus & Arena Control Bar */}
+          <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-4 shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <span className="text-xs font-black uppercase tracking-wider text-mentor-accent shrink-0">
+                ⚡ Focus Skill:
+              </span>
+              <div className="relative flex-1 md:w-80">
+                <select
+                  value={selectedSkill}
+                  onChange={(e) => handleSkillChange(e.target.value)}
+                  className="w-full bg-[#090b10] border border-mentor-border text-white text-xs font-bold rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-mentor-accent transition-all cursor-pointer appearance-none pr-8"
+                >
+                  {SKILL_OPTIONS.map((opt) => (
+                    <option key={opt.id} value={opt.id} className="bg-mentor-surface text-white">
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">
+                  ▼
                 </div>
+              </div>
+            </div>
 
-                <h2 className="text-lg md:text-xl font-black text-white leading-tight mt-2">{challenge.title}</h2>
-                <div className="mt-4 p-4 rounded-2xl bg-[#090b10] border border-mentor-border text-xs leading-relaxed text-gray-200">
-                  <div className="font-bold text-gray-400 mb-1">Instruction:</div>
-                  {challenge.instructions}
-                </div>
+            <div className="flex items-center gap-2.5 w-full md:w-auto justify-end">
+              <button
+                onClick={() => loadNextChallenge(selectedSkill)}
+                disabled={loadingChallenge || isSubmitting}
+                className="py-2.5 px-4 rounded-xl bg-mentor-surface border border-mentor-border hover:border-mentor-accent text-xs font-bold text-gray-200 hover:text-white transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
+              >
+                <span>🔄 REROLL SCENARIO</span>
+              </button>
+            </div>
+          </div>
 
-                {challenge.constraints && challenge.constraints.length > 0 && (
-                  <div className="mt-4">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-mentor-danger mb-2">
-                      ⚠️ Strict Non-Negotiable Constraints:
+          {loadingChallenge ? (
+            <div className="flex flex-col items-center justify-center min-h-[45vh] gap-3 text-mentor-muted">
+              <div className="animate-spin text-mentor-accent text-3xl font-black">⚡</div>
+              <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                Synthesizing Masterclass Challenge via Groq AI & Turso...
+              </span>
+            </div>
+          ) : !challenge ? (
+            <div className="p-8 text-center text-gray-400">
+              <p>No challenge generated. Please choose a skill above or click Reroll.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column: Challenge Brief & Constraints */}
+              <div className="lg:col-span-5 flex flex-col gap-5">
+                <div className="bg-mentor-surface border border-mentor-border rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+                  {/* Challenge Header Badges */}
+                  <div className="flex items-center justify-between text-xs pb-1 border-b border-mentor-border/60">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-1 rounded-lg bg-mentor-accent/20 border border-mentor-accent/40 text-mentor-accent text-[10px] font-black uppercase">
+                        {challenge.type}
+                      </span>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase">
+                        Skill: {challenge.skillId.replace(/_/g, ' ')}
+                      </span>
                     </div>
-                    <ul className="flex flex-col gap-1.5 text-xs text-gray-300">
-                      {challenge.constraints.map((c, i) => (
-                        <li key={i} className="flex items-start gap-2 bg-[#1a0e12] border border-rose-950/60 p-2.5 rounded-xl">
-                          <span className="text-mentor-danger font-black">•</span>
-                          <span>{c}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-300 font-bold text-xs bg-[#090b10] px-2.5 py-1 rounded-lg border border-mentor-border">
+                        ⏱️ {challenge.timeLimitSeconds}s Limit
+                      </span>
+                      <span className="px-2 py-1 rounded-lg bg-mentor-danger/20 text-mentor-danger text-[10px] font-black">
+                        DIFF {challenge.difficulty}
+                      </span>
+                    </div>
+                  </div>
+
+                  <h2 className="text-lg md:text-xl font-black text-white leading-tight">
+                    {challenge.title}
+                  </h2>
+
+                  {/* Scenario Description */}
+                  <div className="p-4 rounded-2xl bg-[#090b10] border border-mentor-border text-xs leading-relaxed text-gray-200">
+                    <div className="text-[10px] uppercase font-bold text-mentor-accent tracking-wider mb-1.5 flex items-center gap-1.5">
+                      <span>🎯 Operational Scenario:</span>
+                    </div>
+                    <div className="text-gray-200 font-medium whitespace-pre-line">
+                      {challenge.instructions}
+                    </div>
+                  </div>
+
+                  {/* Adversary Context Pushback */}
+                  {challenge.adversaryContext && (
+                    <div className="p-4 rounded-2xl bg-[#1c0f14] border border-rose-950/80 text-xs">
+                      <div className="text-[10px] uppercase font-black text-mentor-danger tracking-wider mb-1 flex items-center gap-1.5">
+                        <span>🛡️ Adversarial Resistance & Mindset:</span>
+                      </div>
+                      <div className="text-rose-200 font-medium">
+                        {challenge.adversaryContext}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Strict Non-Negotiable Constraints */}
+                  {challenge.constraints && challenge.constraints.length > 0 && (
+                    <div>
+                      <div className="text-[11px] font-black uppercase tracking-wider text-mentor-danger mb-2.5 flex items-center gap-1.5">
+                        <span>⚠️ Non-Negotiable Constraints (Fail Criteria):</span>
+                      </div>
+                      <ul className="flex flex-col gap-2 text-xs text-gray-200">
+                        {challenge.constraints.map((c, i) => (
+                          <li key={i} className="flex items-start gap-2.5 bg-[#140e12] border border-rose-950/50 p-3 rounded-xl">
+                            <span className="text-mentor-danger font-black leading-none mt-0.5">•</span>
+                            <span className="leading-relaxed">{c}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Pedagogical Standard Banner */}
+                  <div className="p-3.5 rounded-2xl bg-amber-950/15 border border-amber-900/30 text-[11px] text-amber-200/90 leading-relaxed">
+                    <div className="font-black text-mentor-accent uppercase text-[10px] tracking-wider mb-0.5">
+                      Masterclass Grading Protocol:
+                    </div>
+                    No hand-waving or theoretical filler. You are graded strictly on structural cohesion, tactical accuracy, absence of banned crutches, and execution cadence.
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Execution Arena */}
+              <div className="lg:col-span-7 flex flex-col gap-5">
+                <div className="bg-mentor-surface border border-mentor-border rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-mentor-border/60">
+                    <div className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
+                      <span>Your Defense Execution</span>
+                      <span className="text-[10px] text-mentor-muted font-normal">
+                        (Speech or Written Argument)
+                      </span>
+                    </div>
+                    {isRecording ? (
+                      <div className="flex items-center gap-2 text-mentor-danger text-xs font-black animate-pulse bg-mentor-danger/10 px-2.5 py-1 rounded-full border border-mentor-danger/30">
+                        <span className="w-2.5 h-2.5 rounded-full bg-mentor-danger" />
+                        <span>LIVE RECORDING: {recordDuration}s</span>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-gray-400 font-semibold">
+                        Words: {wordCount} {wordCount > 0 ? (" (~" + estSpeechSeconds + "s speech)") : ""}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Recorder Control Bar */}
+                  <div className="flex items-center gap-3">
+                    {!isRecording ? (
+                      <button
+                        onClick={startRecording}
+                        className="flex-1 py-3.5 px-4 rounded-xl bg-mentor-danger hover:brightness-110 active:scale-[0.98] text-white font-black text-xs shadow-lg flex items-center justify-center gap-2 transition-all"
+                      >
+                        <span>🎙️ START LIVE VOICE RECORDING (BROWSER SPEECH ENGINE)</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={stopRecording}
+                        className="flex-1 py-3.5 px-4 rounded-xl bg-gray-700 hover:bg-gray-600 active:scale-[0.98] text-white font-black text-xs shadow-lg flex items-center justify-center gap-2 transition-all"
+                      >
+                        <span>⏹️ STOP RECORDING (LOCK TRANSCRIPT)</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <textarea
+                      value={responseText}
+                      onChange={(e) => setResponseText(e.target.value)}
+                      placeholder="Speak using the recording button above, or type your defense directly here. Your structural cohesion, banned words, and tactical logic will be ruthlessly graded..."
+                      rows={7}
+                      className="w-full bg-[#090b10] border border-mentor-border rounded-2xl p-4 text-xs md:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-mentor-accent transition-colors resize-none leading-relaxed"
+                    />
+                    {wordCount > 0 && (
+                      <div className="absolute right-4 bottom-4 text-[10px] font-bold text-gray-500">
+                        {wordCount} words
+                      </div>
+                    )}
+                  </div>
+
+                  {error && (
+                    <div className="p-3 rounded-xl bg-rose-950/40 border border-mentor-danger text-xs text-rose-300 font-bold">
+                      {error}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting || !responseText.trim()}
+                    className="w-full py-4 bg-gradient-to-r from-mentor-accent to-[#d48e00] hover:brightness-110 active:scale-[0.99] text-black font-black text-sm rounded-2xl shadow-xl disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2">
+                        <span className="animate-spin text-base">⚙️</span>
+                        <span>GROQ AI RUNNING BRUTAL DEFENSE EVALUATION...</span>
+                      </span>
+                    ) : (
+                      <span>⚔️ SUBMIT DEFENSE FOR BRUTAL CRITIQUE & DEBT RESOLUTION</span>
+                    )}
+                  </button>
+                </div>
+
+                {/* Evaluation Result Breakdown */}
+                {evaluationResult && (
+                  <div className="bg-[#090b10] border border-mentor-border rounded-3xl p-6 shadow-2xl flex flex-col gap-5">
+                    <div className="flex items-center justify-between pb-4 border-b border-mentor-border">
+                      <div className="flex items-center gap-4">
+                        <div className={"text-4xl font-black " + (evaluationResult.evaluation.passed ? "text-emerald-400" : "text-mentor-danger")}>
+                          {evaluationResult.evaluation.overallScore}
+                          <span className="text-lg text-gray-500 font-bold">/100</span>
+                        </div>
+                        <div>
+                          <div className={"text-xs font-black uppercase tracking-wider " + (evaluationResult.evaluation.passed ? "text-emerald-400" : "text-mentor-danger")}>
+                            {evaluationResult.evaluation.passed ? "✓ PASSED MASTERCLASS STANDARD" : "✗ FAILED CRITERIA — PENALTY APPLIED"}
+                          </div>
+                          <div className="text-[11px] text-gray-400 mt-0.5">
+                            Deterministic Rubric & Groq AI Synthesis
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => loadNextChallenge(selectedSkill)}
+                        className="px-4 py-2.5 bg-mentor-accent text-black font-extrabold text-xs rounded-xl shadow-md hover:brightness-110 transition-all flex items-center gap-1.5"
+                      >
+                        <span>NEXT CHALLENGE →</span>
+                      </button>
+                    </div>
+
+                    {/* Single Biggest Flaw */}
+                    <div className="p-4 rounded-2xl bg-[#1c0f14] border border-rose-950">
+                      <div className="text-[10px] uppercase font-black text-mentor-danger tracking-wider mb-1 flex items-center gap-1.5">
+                        <span>💥 Single Biggest Identified Flaw:</span>
+                      </div>
+                      <div className="text-xs font-bold text-rose-200 leading-snug">
+                        {evaluationResult.evaluation.brutalCritique.singleBiggestWeakness}
+                      </div>
+                      <div className="text-[11px] text-gray-300 mt-2 leading-relaxed">
+                        <span className="font-bold text-gray-400">Why It Matters: </span>
+                        {evaluationResult.evaluation.brutalCritique.whyItMatters}
+                      </div>
+                    </div>
+
+                    {/* Corrective Micro-Drill */}
+                    <div className="p-4 rounded-2xl bg-amber-950/25 border border-amber-900/50">
+                      <div className="text-[10px] uppercase font-black text-mentor-accent tracking-wider mb-1 flex items-center gap-1.5">
+                        <span>⚡ Mandatory Corrective Micro-Drill:</span>
+                      </div>
+                      <div className="text-xs text-amber-200 leading-relaxed font-medium">
+                        {evaluationResult.evaluation.brutalCritique.correctiveDrillInstructions}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
-
-            {/* Right Column: Execution Arena */}
-            <div className="lg:col-span-7 flex flex-col gap-5">
-              <div className="bg-mentor-surface border border-mentor-border rounded-3xl p-6 shadow-sm flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-white">Your Defense Execution</span>
-                  {isRecording && (
-                    <div className="flex items-center gap-2 text-mentor-danger text-xs font-bold animate-pulse">
-                      <span className="w-2.5 h-2.5 rounded-full bg-mentor-danger" />
-                      <span>RECORDING: {recordDuration}s</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Recorder Control Bar */}
-                <div className="flex items-center gap-3">
-                  {!isRecording ? (
-                    <button
-                      onClick={startRecording}
-                      className="flex-1 py-3.5 px-4 rounded-xl bg-mentor-danger hover:brightness-110 active:scale-95 text-white font-extrabold text-xs shadow-lg flex items-center justify-center gap-2 transition-all"
-                    >
-                      <span>🎙️ START RECORDING (LIVE TRANSCRIPT)</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={stopRecording}
-                      className="flex-1 py-3.5 px-4 rounded-xl bg-gray-700 hover:bg-gray-600 active:scale-95 text-white font-extrabold text-xs shadow-lg flex items-center justify-center gap-2 transition-all"
-                    >
-                      <span>⏹️ STOP RECORDING</span>
-                    </button>
-                  )}
-                </div>
-
-                <textarea
-                  value={responseText}
-                  onChange={(e) => setResponseText(e.target.value)}
-                  placeholder="Record your speech or type your defense here. Your cadence, filler words, and structure will be ruthlessly graded..."
-                  rows={6}
-                  className="w-full bg-[#090b10] border border-mentor-border rounded-2xl p-4 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-mentor-accent transition-colors resize-none leading-relaxed"
-                />
-
-                {error && <div className="text-xs text-mentor-danger font-bold">{error}</div>}
-
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting || !responseText.trim()}
-                    className="flex-1 py-4 bg-gradient-to-r from-mentor-accent to-[#d48e00] hover:brightness-110 active:scale-[0.99] text-black font-black text-sm rounded-2xl shadow-xl disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center gap-2"
-                  >
-                    {isSubmitting ? (
-                      <span>⚙️ GROQ AI EVALUATION IN PROGRESS...</span>
-                    ) : (
-                      <span>SUBMIT DEFENSE FOR BRUTAL CRITIQUE</span>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Evaluation Result Breakdown */}
-              {evaluationResult && (
-                <div className="bg-[#090b10] border border-mentor-border rounded-3xl p-6 shadow-2xl flex flex-col gap-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-mentor-border">
-                    <div className="flex items-center gap-3">
-                      <div className={"text-3xl font-black " + (evaluationResult.evaluation.passed ? "text-emerald-400" : "text-mentor-danger")}>
-                        {evaluationResult.evaluation.overallScore}/100
-                      </div>
-                      <div>
-                        <div className="text-xs font-black uppercase text-white">
-                          {evaluationResult.evaluation.passed ? "PASSED STANDARD" : "FAILED STANDARD"}
-                        </div>
-                        <div className="text-[11px] text-gray-400">Turso Math & Groq Evaluation</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={loadNextChallenge}
-                      className="px-4 py-2 bg-mentor-accent text-black font-extrabold text-xs rounded-xl shadow-md hover:brightness-110 transition-all"
-                    >
-                      NEXT CHALLENGE →
-                    </button>
-                  </div>
-
-                  {/* Single Biggest Weakness */}
-                  <div className="p-4 rounded-2xl bg-[#1a0e12] border border-rose-950">
-                    <div className="text-[10px] uppercase font-black text-mentor-danger tracking-wider mb-1">
-                      Single Biggest Identified Flaw:
-                    </div>
-                    <div className="text-xs font-bold text-rose-200">
-                      {evaluationResult.evaluation.brutalCritique.singleBiggestWeakness}
-                    </div>
-                    <div className="text-[11px] text-gray-400 mt-2 leading-relaxed">
-                      {evaluationResult.evaluation.brutalCritique.whyItMatters}
-                    </div>
-                  </div>
-
-                  {/* Corrective Drill */}
-                  <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-900/40">
-                    <div className="text-[10px] uppercase font-black text-mentor-accent tracking-wider mb-1">
-                      Mandatory Corrective Micro-Drill:
-                    </div>
-                    <div className="text-xs text-amber-200 leading-relaxed">
-                      {evaluationResult.evaluation.brutalCritique.correctiveDrillInstructions}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       );
     }
 
-    function SkillsView({ skills }) {
+    function SkillsView({ skills, onSelectSkillToTrain }) {
       const [category, setCategory] = useState('all');
       const filtered = category === 'all' ? skills : skills.filter(s => s.skill.category === category);
 
@@ -762,9 +908,17 @@ export function renderDashboardHtml(): string {
                   </div>
                   <p className="text-xs text-gray-400 mt-2 leading-relaxed">{s.skill.description}</p>
                 </div>
-                <div className="mt-4 pt-4 border-t border-mentor-border/60 flex items-center justify-between text-xs">
-                  <span className="font-black text-mentor-accent text-sm">Level {s.overallLevel}.{s.overallSublevel}</span>
-                  <span className="text-gray-400">Score: {s.overallScore}/100</span>
+                <div className="mt-4 pt-4 border-t border-mentor-border/60 flex flex-col gap-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-black text-mentor-accent text-sm">Level {s.overallLevel}.{s.overallSublevel}</span>
+                    <span className="text-gray-400 font-semibold">Score: {s.overallScore}/100</span>
+                  </div>
+                  <button
+                    onClick={() => onSelectSkillToTrain && onSelectSkillToTrain(s.skill.id)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-mentor-accent/15 border border-mentor-accent/30 hover:bg-mentor-accent hover:text-black text-mentor-accent font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                  >
+                    <span>⚔️ TRAIN THIS SKILL →</span>
+                  </button>
                 </div>
               </div>
             ))}

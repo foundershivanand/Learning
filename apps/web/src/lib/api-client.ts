@@ -22,9 +22,10 @@ export class ApiClient {
     return this.getLocalMockToday();
   }
 
-  public static async getNextChallenge(): Promise<Challenge> {
+  public static async getNextChallenge(skillId?: string): Promise<Challenge> {
     try {
-      const res = await fetch(`${API_BASE}/api/challenge/next`);
+      const url = skillId ? `${API_BASE}/api/challenge/next?skill=${encodeURIComponent(skillId)}` : `${API_BASE}/api/challenge/next`;
+      const res = await fetch(url);
       if (res.ok) return await res.json();
     } catch (e) {
       console.warn('API unavailable, returning local challenge template', e);

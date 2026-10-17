@@ -14,6 +14,7 @@ import { Zap, X, Compass, ShieldAlert, Flame } from 'lucide-react';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('home');
+  const [trainSkillId, setTrainSkillId] = useState<string>('');
   const [dashboardData, setDashboardData] = useState<TodayDashboardResponse | null>(null);
   const [realityMission, setRealityMission] = useState<RealityMission | null>(null);
   const [showRealityModal, setShowRealityModal] = useState(false);
@@ -104,6 +105,7 @@ export default function App() {
 
           {currentTab === 'train' && (
             <TrainView
+              initialSkill={trainSkillId}
               onChallengeComplete={() => {
                 loadDashboard();
               }}
@@ -111,7 +113,13 @@ export default function App() {
           )}
 
           {currentTab === 'skills' && (
-            <SkillsView skillsOverview={dashboardData.skillsOverview} />
+            <SkillsView 
+              skillsOverview={dashboardData.skillsOverview} 
+              onTrainSkill={(skillId) => {
+                setTrainSkillId(skillId);
+                setCurrentTab('train');
+              }}
+            />
           )}
 
           {currentTab === 'progress' && (

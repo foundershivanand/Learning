@@ -7,9 +7,10 @@ import { ALL_SKILLS } from '@personal-mentor/skills';
 
 interface SkillsViewProps {
   skillsOverview?: SkillSummary[];
+  onTrainSkill?: (skillId: string) => void;
 }
 
-export function SkillsView({ skillsOverview }: SkillsViewProps) {
+export function SkillsView({ skillsOverview, onTrainSkill }: SkillsViewProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedSkillId, setExpandedSkillId] = useState<string | null>('communication');
 
@@ -129,6 +130,18 @@ export function SkillsView({ skillsOverview }: SkillsViewProps) {
                       </div>
                     ))}
                   </div>
+
+                  {onTrainSkill && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTrainSkill(skill.id);
+                      }}
+                      className="mt-4 w-full py-2.5 px-3 rounded-xl bg-mentor-accent/15 border border-mentor-accent/30 hover:bg-mentor-accent hover:text-black text-mentor-accent font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                    >
+                      <span>⚔️ TRAIN THIS SKILL →</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
