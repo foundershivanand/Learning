@@ -8,7 +8,8 @@ import {
   GamificationState, 
   DailyPlan, 
   Challenge, 
-  Attempt 
+  Attempt,
+  AttemptWithChallenge 
 } from '@personal-mentor/shared';
 import { ALL_SKILLS } from '@personal-mentor/skills';
 
@@ -457,5 +458,73 @@ export class TursoMentorStore {
       console.warn('Error fetching challenge from Turso:', e);
     }
     return null;
+  }
+
+  public async getRecentAttempts(limit = 15): Promise<AttemptWithChallenge[]> {
+    try {
+      const res = await this.client.execute({
+        sql: `SELECT a.*, 
+                     c.title as challenge_title,
+                     c.skill_id as challenge_skill_id,
+                     c.dimension_id as challenge_dimension_id,
+                     c.type as challenge_type,
+                     c.instructions as challenge_instructions,
+                     c.adversary_context as challenge_adversary_context,
+                     c.constraints as challenge_constraints,
+                     c.time_limit_seconds as challenge_time_limit_seconds,
+                     c.difficulty as challenge_difficulty,
+                     c.rubric as challenge_rubric
+              FROM attempts a
+              LEFT JOIN challenges c ON a.challenge_id = c.id
+              ORDER BY a.created_at DESC
+              LIMIT ?`,
+        args: [limit],
+      });
+
+      return res.rows.map(row => {
+        let evaluation: any = undefined;
+        try {
+          if (row.evaluation_json) {
+            evaluation = typeof row.evaluation_json === 'string' ? JSON.parse(row.evaluation_json) : row.evaluation_json;
+          }
+        } catch (e) {
+          console.warn('Error parsing evaluation_json in getRecentAttempts:', e);
+        }
+
+        let challenge: Challenge | undefined = undefined;
+        if (row.challenge_title) {
+          challenge = {
+            id: String(row.challenge_id),
+            title: String(row.challenge_title),
+            skillId: String(row.challenge_skill_id),
+            dimensionId: String(row.challenge_dimension_id),
+            type: (row.challenge_type as any) || 'EXPLAIN',
+            instructions: String(row.challenge_instructions || ''),
+            adversaryContext: row.challenge_adversary_context ? String(row.challenge_adversary_context) : undefined,
+            constraints: row.challenge_constraints ? JSON.parse(String(row.challenge_constraints)) : [],
+            timeLimitSeconds: Number(row.challenge_time_limit_seconds || 60),
+            difficulty: Number(row.challenge_difficulty || 50),
+            rubric: row.challenge_rubric ? JSON.parse(String(row.challenge_rubric)) : [],
+            isBossChallenge: false,
+            createdAt: String(row.created_at),
+          };
+        }
+
+        return {
+          id: String(row.id),
+          challengeId: String(row.challenge_id),
+          startedAt: String(row.started_at),
+          completedAt: String(row.completed_at),
+          responseText: row.response_text ? String(row.response_text) : undefined,
+          mediaUrl: row.media_url ? String(row.media_url) : undefined,
+          mediaType: (row.media_type as any) || undefined,
+          evaluation,
+          challenge,
+        };
+      });
+    } catch (e) {
+      console.warn('Error fetching recent attempts from Turso:', e);
+      return [];
+    }
   }
 }

@@ -20,5 +20,11 @@ describe('Turso Database Store Integration', () => {
     const gamification = await store.getGamification();
     assert.ok(gamification);
     assert.strictEqual(typeof gamification.totalXp, 'number');
+
+    const recentAttempts = await store.getRecentAttempts(5);
+    assert.ok(Array.isArray(recentAttempts));
+    assert.ok(recentAttempts.length > 0, 'Expected to find logged attempts in Turso');
+    assert.ok(recentAttempts[0].id);
+    assert.ok(recentAttempts[0].evaluation);
   });
 });

@@ -127,6 +127,7 @@ export default function App() {
               weaknesses={dashboardData.weaknesses || (dashboardData.primaryWeakness ? [dashboardData.primaryWeakness] : [])}
               trainingDebt={dashboardData.trainingDebt}
               gamification={dashboardData.gamification}
+              recentAttempts={dashboardData.recentAttempts}
             />
           )}
 

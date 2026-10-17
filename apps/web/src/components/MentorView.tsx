@@ -120,7 +120,28 @@ export function MentorView() {
       </div>
 
       {/* Chat Input Bar */}
-      <div className="pt-2">
+      <div className="pt-2 flex flex-col gap-2">
+        {/* Quick Prompt Chips */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {[
+            "What drills have I taken so far and what were my scores?",
+            "Why did I fail my latest drill?",
+            "What is my single biggest recurring speech flaw?",
+            "How do I clear my active training debt?"
+          ].map((chip, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                setInputText(chip);
+              }}
+              className="px-3 py-1.5 rounded-full bg-mentor-surface border border-mentor-border text-[11px] text-gray-300 hover:text-mentor-accent hover:border-mentor-accent whitespace-nowrap transition-all active:scale-95"
+            >
+              {chip}
+            </button>
+          ))}
+        </div>
+
         <form
           onSubmit={(e) => {
             e.preventDefault();

@@ -7,7 +7,8 @@ import {
   GamificationState, 
   DailyPlan, 
   Challenge, 
-  Attempt 
+  Attempt,
+  AttemptWithChallenge 
 } from '@personal-mentor/shared';
 import { ALL_SKILLS } from '@personal-mentor/skills';
 
@@ -221,6 +222,13 @@ export class MentorStore {
 
     this.dailyPlans.set(dateStr, newPlan);
     return newPlan;
+  }
+
+  public getRecentAttempts(limit = 15): AttemptWithChallenge[] {
+    return this.attempts.slice(-limit).reverse().map(att => ({
+      ...att,
+      challenge: this.challenges.get(att.challengeId),
+    }));
   }
 }
 

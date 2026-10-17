@@ -4,7 +4,8 @@ import {
   SubmitAttemptResponse,
   TelegramWebhookPayload,
   Challenge,
-  Attempt
+  Attempt,
+  AttemptWithChallenge
 } from '@personal-mentor/shared';
 import { 
   AssessmentEngine, 
@@ -45,6 +46,37 @@ function jsonResponse(data: any, status = 200) {
       ...CORS_HEADERS,
     },
   });
+}
+
+export function formatDrillHistoryContext(attempts: AttemptWithChallenge[]): string {
+  if (!attempts || attempts.length === 0) {
+    return 'Zero historical drill attempts recorded. The user has not completed any practice challenges yet.';
+  }
+
+  return attempts.map((att, idx) => {
+    const ch = att.challenge;
+    const ev = att.evaluation;
+    const title = ch?.title || `Challenge ${att.challengeId}`;
+    const skill = ch ? `${ch.skillId} (${ch.dimensionId})` : 'Skill drill';
+    const date = att.completedAt || att.startedAt || 'Recent';
+    const score = ev ? `${ev.overallScore}/100 (${ev.passed ? 'PASSED' : 'FAILED'})` : 'Unevaluated';
+    const resp = att.responseText ? `"${att.responseText}"` : '[No transcript or response recorded]';
+    const weakness = ev?.brutalCritique?.singleBiggestWeakness || 'None recorded';
+    const mistakes = ev?.dimensionScores?.flatMap(d => d.identifiedMistakes || []) || [];
+    const metrics = ev?.metrics 
+      ? `Duration: ${ev.metrics.durationSeconds}s, Word Count: ${ev.metrics.wordCount}, WPM: ${ev.metrics.wordsPerMinute}, Filler Count: ${ev.metrics.fillerWordCount} (${JSON.stringify(ev.metrics.detectedFillers || {})})` 
+      : 'N/A';
+
+    return `[DRILL #${idx + 1}] Date: ${date}
+- Title: "${title}"
+- Skill Domain: ${skill} | Difficulty: ${ch?.difficulty || 50} | Type: ${ch?.type || 'DRILL'}
+- Result: ${score}
+- User's Exact Speech / Written Defense:
+  ${resp}
+- Single Biggest Weakness Caught: ${weakness}
+- Specific Mistakes Identified: ${mistakes.length > 0 ? mistakes.join('; ') : 'None'}
+- Speech Metrics: ${metrics}`;
+  }).join('\n\n');
 }
 
 export default {
@@ -118,6 +150,7 @@ export default {
           const activeWeakness = weaknesses.find(w => w.status !== 'RESOLVED') || null;
           const skillsOverview = await turso.getSkillsOverview();
           const gamification = await turso.getGamification();
+          const recentAttempts = await turso.getRecentAttempts(10);
 
           const response: TodayDashboardResponse = {
             profile,
@@ -128,6 +161,7 @@ export default {
             primaryWeakness: activeWeakness,
             weaknesses,
             skillsOverview,
+            recentAttempts,
           };
           return jsonResponse(response);
         }
@@ -137,6 +171,7 @@ export default {
         const activeWeakness = globalStore.weaknesses.find(w => w.status !== 'RESOLVED') || null;
         const skillsOverview = globalStore.getSkillsOverview();
         const activeChallenges = Array.from(globalStore.challenges.values()).slice(0, 3);
+        const recentAttempts = globalStore.getRecentAttempts(10);
 
         const response: TodayDashboardResponse = {
           profile: globalStore.profile,
@@ -147,6 +182,7 @@ export default {
           primaryWeakness: activeWeakness,
           weaknesses: globalStore.weaknesses,
           skillsOverview,
+          recentAttempts,
         };
 
         return jsonResponse(response);
@@ -463,15 +499,26 @@ Output JSON matching:
         const weaknesses = turso ? await turso.getWeaknesses() : globalStore.weaknesses;
         const activeW = weaknesses.find(w => w.status !== 'RESOLVED');
         const gamification = turso ? await turso.getGamification() : globalStore.gamification;
+        const recentAttempts = turso ? await turso.getRecentAttempts(10) : globalStore.getRecentAttempts(10);
+        const drillHistoryText = formatDrillHistoryContext(recentAttempts);
 
         const systemPrompt = `You are the user's personal adversarial performance coach and AI Mentor.
-Core Directive: Maximize measurable real-world skill improvement. Never give empty praise.
-Current User Context:
-- Streak: ${gamification.currentStreakDays} days | Total XP: ${gamification.totalXp}
-- Training Debt: ${debt.totalActiveDebtPoints} points (${debt.mandatoryDrillsCount} mandatory drills required)
-- Active Unresolved Weakness: ${activeW ? activeW.description : 'None detected yet'}
+Core Directive: Maximize measurable real-world skill improvement. Never give empty praise. Be ruthlessly honest, rigorous, and demanding.
 
-Tone: Direct, demanding, serious, and concise. No generic pleasantries. Call out hesitation and excuses immediately.`;
+CURRENT USER OPERATING CONTEXT:
+- Streak: ${gamification.currentStreakDays} days | Total XP: ${gamification.totalXp}
+- Training Debt: ${debt.totalActiveDebtPoints} points (${debt.mandatoryDrillsCount} mandatory remediation drills required)
+- Active Unresolved Weakness: ${activeW ? `${activeW.dimensionName}: ${activeW.description} (Occurrences: ${activeW.occurrenceCount})` : 'None detected yet'}
+
+HISTORICAL DRILL LOGS & REAL ATTEMPTS (${recentAttempts.length} logged):
+${drillHistoryText}
+
+INSTRUCTIONS FOR MENTOR SPARRING & ACCOUNTABILITY:
+1. You have complete, transparent access to the user's past drill history above.
+2. When the user asks what drills they have taken, how they performed, what their score was, or why they failed, reference these exact drills, their scores, specific quotes from their transcripts, and identified flaws directly. Never claim that you don't have access to their drill logs.
+3. Call out their recurring patterns, incoherence, filler words, or failure to follow structure without sugarcoating.
+4. If they try to rationalize, push back immediately with their concrete attempt evidence.
+5. Tone: Direct, demanding, serious, and concise. No generic pleasantries. Call out hesitation and excuses immediately.`;
 
         const chatMessages = [
           { role: 'system' as const, content: systemPrompt },
@@ -549,6 +596,18 @@ Mandatory Remediation Drills: ${debt.mandatoryDrillsCount}
 Unresolved items: ${debt.unresolvedDebts.length}
 
 Complete your corrective drills to clear debt and unlock progression.`;
+        } else if (text === '/drills' || text === '/history') {
+          const recentAttempts = turso ? await turso.getRecentAttempts(5) : globalStore.getRecentAttempts(5);
+          if (recentAttempts.length === 0) {
+            replyText = `⚔️ *DRILL PERFORMANCE HISTORY*\nNo drills completed yet. Send /train to begin your first challenge!`;
+          } else {
+            const list = recentAttempts.map((a, i) => {
+              const score = a.evaluation?.overallScore ?? 0;
+              const passed = a.evaluation?.passed ? '✓ PASS' : '✗ FAIL';
+              return `${i + 1}. *${a.challenge?.title || a.challengeId}*\n   Score: ${score}/100 [${passed}]\n   Flaw: ${a.evaluation?.brutalCritique?.singleBiggestWeakness || 'N/A'}`;
+            }).join('\n\n');
+            replyText = `⚔️ *RECENT DRILL PERFORMANCE*\n\n${list}`;
+          }
         } else if (message?.voice || message?.video_note) {
           replyText = `🎙️ Media received. Evaluating speech cadence and filler word density...`;
         }

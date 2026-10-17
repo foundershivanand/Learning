@@ -8,6 +8,7 @@ import {
   DailyPlan, 
   Challenge, 
   Attempt,
+  AttemptWithChallenge,
   TodayDashboardResponse,
   SubmitAttemptRequest,
   SubmitAttemptResponse,
@@ -257,6 +258,7 @@ export class MentorServerStore {
       primaryWeakness: activeWeakness,
       weaknesses: this.weaknesses,
       skillsOverview,
+      recentAttempts: this.getRecentAttempts(10),
     };
   }
 
@@ -518,18 +520,49 @@ Respond ONLY with a valid JSON object matching this schema:
     };
   }
 
+  public getRecentAttempts(limit = 15): AttemptWithChallenge[] {
+    return this.attempts.slice(-limit).reverse().map(att => ({
+      ...att,
+      challenge: this.challenges.get(att.challengeId),
+    }));
+  }
+
   public async chat(messages: { role: 'user' | 'assistant'; content: string }[]): Promise<string> {
     const debt = TrainingDebtEngine.calculateSummary(this.debts);
     const activeW = this.weaknesses.find(w => w.status !== 'RESOLVED');
+    const recentAttempts = this.getRecentAttempts(10);
+
+    const drillHistoryText = recentAttempts.length === 0
+      ? 'Zero historical drill attempts recorded yet.'
+      : recentAttempts.map((att, idx) => {
+          const ch = att.challenge;
+          const ev = att.evaluation;
+          const title = ch?.title || `Challenge ${att.challengeId}`;
+          const skill = ch ? `${ch.skillId} (${ch.dimensionId})` : 'Skill drill';
+          const score = ev ? `${ev.overallScore}/100 (${ev.passed ? 'PASSED' : 'FAILED'})` : 'Unevaluated';
+          const resp = att.responseText ? `"${att.responseText}"` : '[No transcript]';
+          const weakness = ev?.brutalCritique?.singleBiggestWeakness || 'None recorded';
+          return `[DRILL #${idx + 1}] Title: "${title}" | Domain: ${skill} | Result: ${score}
+- User Answer: ${resp}
+- Single Flaw: ${weakness}`;
+        }).join('\n\n');
 
     const systemPrompt = `You are the user's personal adversarial performance coach and AI Mentor.
-Core Directive: Maximize measurable real-world skill improvement. Never give empty praise.
-Current User Context:
+Core Directive: Maximize measurable real-world skill improvement. Never give empty praise. Be ruthlessly honest, rigorous, and demanding.
+
+CURRENT USER OPERATING CONTEXT:
 - Streak: ${this.gamification.currentStreakDays} days | Total XP: ${this.gamification.totalXp}
 - Training Debt: ${debt.totalActiveDebtPoints} points (${debt.mandatoryDrillsCount} mandatory drills required)
 - Active Unresolved Weakness: ${activeW ? activeW.description : 'None detected yet'}
 
-Tone: Direct, demanding, serious, and concise. No generic pleasantries. Call out hesitation and excuses immediately.`;
+HISTORICAL DRILL LOGS & REAL ATTEMPTS (${recentAttempts.length} logged):
+${drillHistoryText}
+
+INSTRUCTIONS FOR MENTOR SPARRING:
+1. You have complete, transparent access to the user's past drill history above.
+2. When the user asks what drills they have taken, how they performed, what their score was, or why they failed, reference these exact drills, their scores, specific quotes from their transcripts, and identified flaws directly.
+3. Call out their recurring patterns, incoherence, filler words, or failure to follow structure without sugarcoating.
+4. Tone: Direct, demanding, serious, and concise. No generic pleasantries. Call out hesitation and excuses immediately.`;
 
     const chatMessages = [
       { role: 'system' as const, content: systemPrompt },

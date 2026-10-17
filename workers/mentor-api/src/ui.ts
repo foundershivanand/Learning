@@ -260,7 +260,7 @@ export function renderDashboardHtml(): string {
               )}
 
               {currentTab === 'mentor' && (
-                <MentorView />
+                <MentorView data={data} />
               )}
             </div>
 
@@ -928,6 +928,8 @@ export function renderDashboardHtml(): string {
     }
 
     function ProgressView({ data }) {
+      const recentAttempts = data?.recentAttempts || [];
+
       return (
         <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -995,29 +997,105 @@ export function renderDashboardHtml(): string {
               )}
             </div>
           </div>
+
+          {/* Drill Performance & History */}
+          <div className="bg-mentor-surface border border-mentor-border rounded-3xl p-6 shadow-sm">
+            <div className="flex items-center justify-between text-xs mb-4 pb-3 border-b border-mentor-border/60">
+              <span className="font-black text-white uppercase tracking-wider text-xs flex items-center gap-2">
+                <span>⚔️</span>
+                <span>Drill Performance & Evaluation History</span>
+              </span>
+              <span className="text-xs text-mentor-accent font-bold bg-[#090b10] px-3 py-1 rounded-full border border-mentor-border">
+                {recentAttempts.length} Logged in Turso
+              </span>
+            </div>
+
+            {recentAttempts.length === 0 ? (
+              <div className="text-xs text-gray-400 py-8 text-center bg-[#090b10] rounded-2xl border border-mentor-border/60">
+                Zero drills completed yet. Jump into the Practice Arena to establish your baseline.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3.5">
+                {recentAttempts.map((att, i) => (
+                  <div key={att.id} className="bg-[#090b10] border border-mentor-border p-4 rounded-2xl flex flex-col gap-2.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-white text-xs">
+                          {att.challenge ? att.challenge.title : ("Challenge " + att.challengeId)}
+                        </span>
+                        {att.challenge && att.challenge.skillId && (
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-mentor-surface border border-mentor-border text-gray-300 font-semibold uppercase">
+                            {att.challenge.skillId.replace(/_/g, ' ')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={"text-xs font-black px-2.5 py-0.5 rounded " + (att.evaluation && att.evaluation.passed ? "bg-emerald-950 text-emerald-400 border border-emerald-800" : "bg-mentor-danger/20 text-mentor-danger border border-mentor-danger/40")}>
+                          {att.evaluation ? (att.evaluation.overallScore + "/100") : "N/A"} {att.evaluation && att.evaluation.passed ? "✓ PASSED" : "✗ FAILED"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {att.responseText && (
+                      <div className="p-3 rounded-xl bg-mentor-surface/60 border border-mentor-border/40 text-[11px] text-gray-300 italic leading-relaxed">
+                        "{att.responseText}"
+                      </div>
+                    )}
+
+                    {att.evaluation && att.evaluation.brutalCritique && (
+                      <div className="flex flex-col gap-1.5 pt-2 border-t border-mentor-border/40 text-xs">
+                        <div className="text-rose-300">
+                          <span className="font-black text-mentor-danger uppercase text-[10px] tracking-wider">Identified Flaw: </span>
+                          <span className="font-semibold">{att.evaluation.brutalCritique.singleBiggestWeakness}</span>
+                        </div>
+                        {att.evaluation.brutalCritique.correctiveDrillInstructions && (
+                          <div className="text-amber-200/90 text-[11px]">
+                            <span className="font-black text-mentor-accent uppercase text-[10px] tracking-wider">Mandatory Fix: </span>
+                            {att.evaluation.brutalCritique.correctiveDrillInstructions}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       );
     }
 
-    function MentorView() {
+    function MentorView({ data }) {
+      const recentAttempts = data ? (data.recentAttempts || []) : [];
+      const latestAttempt = recentAttempts[0];
+
+      const initialGreeting = latestAttempt
+        ? ("I have full access to your historical drill logs in Turso. Your latest drill was '" + (latestAttempt.challenge ? latestAttempt.challenge.title : "Practice Drill") + "' (" + (latestAttempt.challenge ? latestAttempt.challenge.skillId : "Skill") + ") where you scored " + (latestAttempt.evaluation ? latestAttempt.evaluation.overallScore : 0) + "/100. State your excuse or ask for an audit of your execution.")
+        : "I am not here to validate your feelings. I am here to ensure you do not fool yourself. State your current performance bottleneck, or ask for an excuse audit.";
+
       const [messages, setMessages] = useState([
         {
           id: '1',
           sender: 'mentor',
-          text: 'I am not here to validate your feelings. I am here to ensure you do not fool yourself. State your current performance bottleneck, or ask for an excuse audit.',
+          text: initialGreeting,
           time: '06:00 AM'
         }
       ]);
       const [input, setInput] = useState('');
       const [loading, setLoading] = useState(false);
 
-      const handleSend = async () => {
-        if (!input.trim() || loading) return;
+      const sendPrompt = (text) => {
+        handleSendCustom(text);
+      };
+
+      const handleSendCustom = async (textToSend) => {
+        const text = (textToSend || input).trim();
+        if (!text || loading) return;
 
         const userMsg = {
           id: String(Date.now()),
           sender: 'user',
-          text: input.trim(),
+          text,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
@@ -1057,9 +1135,11 @@ export function renderDashboardHtml(): string {
         }
       };
 
+      const handleSend = () => handleSendCustom(input);
+
       return (
         <div className="flex flex-col h-[calc(100vh-8rem)] max-w-5xl mx-auto w-full">
-          <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-4 shadow-sm flex items-center justify-between mb-3">
+          <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-4 shadow-sm flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-mentor-danger/20 border border-mentor-danger/50 flex items-center justify-center text-mentor-danger font-black">
                 ⚔️
@@ -1069,9 +1149,32 @@ export function renderDashboardHtml(): string {
                 <div className="text-[11px] text-mentor-muted">Zero Empty Praise • Extreme Accountability</div>
               </div>
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-mentor-danger/20 text-mentor-danger uppercase">
-              Ruthless Mode
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
+                Turso: {recentAttempts.length} Drills Synced
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-mentor-danger/20 text-mentor-danger uppercase">
+                Ruthless
+              </span>
+            </div>
+          </div>
+
+          {/* Quick Prompt Chips */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-2">
+            {[
+              "What drills have I taken so far and what were my scores?",
+              "Why did I fail my latest drill?",
+              "What is my single biggest recurring speech flaw?",
+              "How do I clear my active training debt?"
+            ].map((chip, idx) => (
+              <button
+                key={idx}
+                onClick={() => sendPrompt(chip)}
+                className="px-3 py-1.5 rounded-full bg-mentor-surface border border-mentor-border text-[11px] text-gray-300 hover:text-mentor-accent hover:border-mentor-accent whitespace-nowrap transition-all active:scale-95"
+              >
+                {chip}
+              </button>
+            ))}
           </div>
 
           <div className="flex-1 overflow-y-auto flex flex-col gap-3 p-2">
@@ -1089,7 +1192,7 @@ export function renderDashboardHtml(): string {
             {loading && (
               <div className="flex items-center gap-2 text-xs text-mentor-muted ml-10">
                 <span className="animate-spin text-mentor-danger">⚡</span>
-                <span>Mentor analyzing weaknesses...</span>
+                <span>Mentor analyzing weaknesses & drill records...</span>
               </div>
             )}
           </div>
@@ -1105,7 +1208,7 @@ export function renderDashboardHtml(): string {
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="px-5 py-2.5 rounded-xl bg-mentor-accent text-black font-bold text-xs disabled:opacity-30 transition-all hover:brightness-110"
+              className="px-5 py-2.5 rounded-xl bg-mentor-accent text-black font-bold text-xs disabled:opacity-30 transition-all hover:brightness-110 active:scale-95"
             >
               SEND
             </button>

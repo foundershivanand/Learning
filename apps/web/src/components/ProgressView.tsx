@@ -8,17 +8,19 @@ import {
   Flame, 
   Trophy, 
   ShieldAlert, 
-  Clock 
+  Clock,
+  Zap
 } from 'lucide-react';
-import { Weakness, TrainingDebtSummary, GamificationState } from '@personal-mentor/shared';
+import { Weakness, TrainingDebtSummary, GamificationState, AttemptWithChallenge } from '@personal-mentor/shared';
 
 interface ProgressViewProps {
   weaknesses: Weakness[];
   trainingDebt: TrainingDebtSummary;
   gamification: GamificationState;
+  recentAttempts?: AttemptWithChallenge[];
 }
 
-export function ProgressView({ weaknesses, trainingDebt, gamification }: ProgressViewProps) {
+export function ProgressView({ weaknesses, trainingDebt, gamification, recentAttempts }: ProgressViewProps) {
   const activeWeaknesses = weaknesses.filter(w => w.status !== 'RESOLVED');
   const resolvedWeaknesses = weaknesses.filter(w => w.status === 'RESOLVED');
 
@@ -148,6 +150,70 @@ export function ProgressView({ weaknesses, trainingDebt, gamification }: Progres
           </div>
         </div>
       )}
+
+      {/* Drill Performance & History */}
+      <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-5 shadow-sm">
+        <div className="flex items-center justify-between text-xs mb-4 pb-3 border-b border-mentor-border/60">
+          <div className="flex items-center gap-2 text-white font-bold uppercase tracking-wider text-xs">
+            <Zap size={15} className="text-mentor-accent" />
+            Drill Performance & Evaluation History
+          </div>
+          <span className="text-xs text-mentor-accent font-bold bg-[#090b10] px-3 py-1 rounded-full border border-mentor-border">
+            {recentAttempts?.length || 0} Logged
+          </span>
+        </div>
+
+        {(!recentAttempts || recentAttempts.length === 0) ? (
+          <div className="text-xs text-gray-400 py-8 text-center bg-[#090b10] rounded-xl border border-mentor-border/60">
+            Zero drills completed yet. Jump into the Practice Arena to establish your baseline.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3.5">
+            {recentAttempts.map((att) => (
+              <div key={att.id} className="bg-[#090b10] border border-mentor-border p-4 rounded-xl flex flex-col gap-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-white text-xs">
+                      {att.challenge?.title || `Challenge ${att.challengeId}`}
+                    </span>
+                    {att.challenge?.skillId && (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-mentor-surface border border-mentor-border text-gray-300 font-semibold uppercase">
+                        {att.challenge.skillId.replace(/_/g, ' ')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-black px-2.5 py-0.5 rounded ${att.evaluation?.passed ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-mentor-danger/20 text-mentor-danger border border-mentor-danger/40'}`}>
+                      {att.evaluation ? `${att.evaluation.overallScore}/100` : 'N/A'} {att.evaluation?.passed ? '✓ PASSED' : '✗ FAILED'}
+                    </span>
+                  </div>
+                </div>
+
+                {att.responseText && (
+                  <div className="p-3 rounded-lg bg-mentor-surface/60 border border-mentor-border/40 text-[11px] text-gray-300 italic leading-relaxed">
+                    "{att.responseText}"
+                  </div>
+                )}
+
+                {att.evaluation?.brutalCritique && (
+                  <div className="flex flex-col gap-1.5 pt-2 border-t border-mentor-border/40 text-xs">
+                    <div className="text-rose-300">
+                      <span className="font-black text-mentor-danger uppercase text-[10px] tracking-wider">Identified Flaw: </span>
+                      <span className="font-semibold">{att.evaluation.brutalCritique.singleBiggestWeakness}</span>
+                    </div>
+                    {att.evaluation.brutalCritique.correctiveDrillInstructions && (
+                      <div className="text-amber-200/90 text-[11px]">
+                        <span className="font-black text-mentor-accent uppercase text-[10px] tracking-wider">Mandatory Fix: </span>
+                        {att.evaluation.brutalCritique.correctiveDrillInstructions}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

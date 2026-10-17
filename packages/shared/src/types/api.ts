@@ -4,6 +4,10 @@ import { Weakness, TrainingDebtSummary } from './weakness';
 import { GamificationState, DailyPlan } from './gamification';
 import { MentorProfile, RealityMission } from './mentor';
 
+export interface AttemptWithChallenge extends Attempt {
+  challenge?: Challenge;
+}
+
 export interface TodayDashboardResponse {
   profile: MentorProfile;
   dailyPlan: DailyPlan;
@@ -13,6 +17,7 @@ export interface TodayDashboardResponse {
   primaryWeakness: Weakness | null;
   weaknesses?: Weakness[];
   skillsOverview: SkillSummary[];
+  recentAttempts?: AttemptWithChallenge[];
 }
 
 export interface SubmitAttemptRequest {
