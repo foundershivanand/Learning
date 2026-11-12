@@ -15,7 +15,7 @@ export function SkillsView({ skillsOverview, onTrainSkill }: SkillsViewProps) {
   const [expandedSkillId, setExpandedSkillId] = useState<string | null>('communication');
 
   const categories = [
-    { id: 'all', label: 'All 15' },
+    { id: 'all', label: `All ${ALL_SKILLS.length}` },
     { id: 'communication', label: 'Communication' },
     { id: 'business', label: 'Business' },
     { id: 'cognition', label: 'Cognition' },
@@ -44,7 +44,7 @@ export function SkillsView({ skillsOverview, onTrainSkill }: SkillsViewProps) {
       <div className="bg-mentor-surface border border-mentor-border rounded-2xl p-4 shadow-sm">
         <div className="flex items-center gap-2 text-mentor-accent text-xs font-bold uppercase tracking-wider mb-1">
           <Layers size={16} />
-          15-Skill Mastery Matrix
+          {ALL_SKILLS.length}-Skill Mastery Matrix
         </div>
         <p className="text-xs text-gray-300">
           Progression requires minimum 3 consecutive clean passes under adversarial conditions.

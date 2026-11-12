@@ -22,14 +22,14 @@
                                   │
         ┌─────────────────────────┼─────────────────────────┐
         ▼                         ▼                         ▼
-   SUPABASE DB                AI ROUTER               CLOUDFLARE R2
-  (PostgreSQL)                    │                  (Raw Audio/Video)
-  • Profile & Skills       ┌──────┴──────┐
-  • Skill Dimensions       ▼             ▼
-  • Weaknesses        Workers AI       Groq
-  • Training Debt    (GLM/Nemotron/   (Llama 3
-  • Gamification       Gemma/ASR)      Backup)
-  • Attempts/Logs          │
+    TURSO DB                  AI ROUTER               CLOUDFLARE R2
+(libSQL / SQLite)                 │                  (Raw Audio/Video)
+• Profile & Skills         ┌──────┴──────┐
+• Skill Dimensions         ▼             ▼
+• Weaknesses          Workers AI       Groq
+• Training Debt      (GLM/Nemotron/   (Qwen / Llama 3
+• Gamification         Gemma/ASR)      Backup)
+• Attempts/Logs            │
                            ▼
                     ┌─────────────┐
                     │ MENTOR CORE │
@@ -43,7 +43,7 @@
 
 ---
 
-## 🎯 The 15 Core Skills
+## 🎯 The 16 Core Skills
 
 1. **Communication** (Clarity, Fluency, Structure, Conciseness, Improvisation)
 2. **Public Speaking** (Hook Opening, Vocal Modulation & Projection)
@@ -60,6 +60,7 @@
 13. **Learning Ability** (Feynman Simplification, Spaced Recall & Transfer)
 14. **Creativity** (Constraint Exploitation, Cross-Domain Lateral Synthesis)
 15. **Discipline & Execution** (Resistance to Avoidance, Daily Operating Rhythm)
+16. **Spanish** (Spontaneous Spoken Fluency, Rapid Verb Conjugation, Listening & Idioms, Pressure Argumentation)
 
 ---
 

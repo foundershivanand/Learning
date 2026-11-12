@@ -2,9 +2,12 @@ import { createClient } from '@libsql/client';
 import { ALL_SKILLS } from '../skills/index';
 
 const TURSO_URL = process.env.TURSO_DATABASE_URL || 'libsql://learning-sh15aa.aws-ap-south-1.turso.io';
-const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIyMjg2ODUsImlkIjoiMDFhMTQ5MjctMWYwMS03NjMyLTgwMmMtMjMzM2RiZjE2MzY5Iiwia2lkIjoiWF9DMjR2aUQyM3BtWUR2U2MzWUh5RjdIVkc5dW5qb01rVFV5Z3ItaGZtWSIsInJpZCI6ImUzOGQyYjYzLWUyNzQtNGJhYi05M2FkLWFiOWYzYWI0MzhiYSJ9.Qc3rDENAVJpMN-vzGk0Au0XGsejKjJXYJ47uiQIfxRE-6ISTzn4hrf-7sMMSEnz-CDBb7AHnAmGnUqC9cSF3Cg';
+const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;
 
 export async function runMigration() {
+  if (!TURSO_AUTH_TOKEN) {
+    throw new Error('TURSO_AUTH_TOKEN environment variable is required to run database migrations.');
+  }
   console.log('Connecting to Turso Database:', TURSO_URL);
   const client = createClient({
     url: TURSO_URL,

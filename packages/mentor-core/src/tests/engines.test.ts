@@ -7,7 +7,9 @@ import {
   TrainingDebtEngine, 
   ChallengeEngine,
   AssessmentEngine,
-  GamificationEngine
+  GamificationEngine,
+  ContextEngine,
+  RealityModeEngine
 } from '../index';
 import { SkillState, Weakness, Challenge } from '@personal-mentor/shared';
 
@@ -204,6 +206,120 @@ describe('AI Mentor Core Engines Test Suite', () => {
       assert.strictEqual(target.skillId, 'communication');
       assert.strictEqual(target.dimensionId, 'comm_clarity');
       assert.strictEqual(target.targetDifficulty, 68, 'Expected current score 60 + margin 8 = 68');
+    });
+  });
+
+  describe('GamificationEngine', () => {
+    it('accurately calculates XP and maintains combo streaks', () => {
+      // Base XP check
+      const xpNormal = GamificationEngine.calculateXp(50, true, 1.0);
+      assert.strictEqual(xpNormal.baseXp, 40);
+      assert.strictEqual(xpNormal.passBonus, 80);
+      assert.strictEqual(xpNormal.difficultyBonus, 40);
+      assert.strictEqual(xpNormal.totalAwarded, 160);
+
+      // Streak update check
+      const initialGam = {
+        totalXp: 100,
+        currentStreakDays: 2,
+        longestStreakDays: 5,
+        lastActiveDate: '2026-11-10',
+        comboMultiplier: 1.0,
+        bossClearsCount: 0,
+        unlockedTiers: ['TIER_1'],
+      };
+
+      // Consecutive next day pass
+      const updated = GamificationEngine.updateStreakAndCombos(initialGam, '2026-11-11', true);
+      assert.strictEqual(updated.currentStreakDays, 3);
+      assert.ok(updated.comboMultiplier > 1.0, 'Combo multiplier should increase on pass');
+
+      // Failure resets combo multiplier to 1.0
+      const failed = GamificationEngine.updateStreakAndCombos(updated, '2026-11-12', false);
+      assert.strictEqual(failed.comboMultiplier, 1.0);
+    });
+  });
+
+  describe('ContextEngine', () => {
+    it('compiles lean compact context correctly identifying lowest skill and primary weakness', () => {
+      const profile = {
+        id: '1',
+        name: 'Shivanand',
+        goals: ['Master Articulation'],
+        rules: ['Zero empty praise'],
+        dailyTargetMinutes: 25,
+        timezone: 'Asia/Kolkata',
+        createdAt: '',
+        updatedAt: '',
+      };
+
+      const skills: any[] = [
+        {
+          skill: { id: 'communication', name: 'Communication', dimensions: [{ id: 'comm_clarity', name: 'Clarity' }] },
+          overallScore: 55,
+          overallLevel: 1,
+          overallSublevel: 1,
+          dimensionStates: [{ dimensionId: 'comm_clarity', score: 55 }],
+        },
+        {
+          skill: { id: 'chess', name: 'Chess', dimensions: [{ id: 'chess_tactics', name: 'Tactics' }] },
+          overallScore: 75,
+          overallLevel: 2,
+          overallSublevel: 1,
+          dimensionStates: [{ dimensionId: 'chess_tactics', score: 75 }],
+        }
+      ];
+
+      const weaknesses: Weakness[] = [
+        {
+          id: 'w-1',
+          skillId: 'communication',
+          dimensionId: 'comm_clarity',
+          dimensionName: 'Clarity',
+          description: 'Excessive hesitation',
+          severity: 'HIGH',
+          confidence: 0.8,
+          occurrenceCount: 3,
+          consecutivePasses: 0,
+          status: 'ACTIVE',
+          firstDetectedAt: '',
+          lastDetectedAt: '',
+          recentEvidence: [],
+        }
+      ];
+
+      const debtSummary = {
+        totalActiveDebtPoints: 2,
+        mandatoryDrillsCount: 1,
+        unresolvedDebts: [],
+      };
+
+      const context = ContextEngine.buildCompactContext({
+        profile,
+        skills,
+        activeWeaknesses: weaknesses,
+        trainingDebt: debtSummary,
+        recentAttempts: [],
+      });
+
+      assert.strictEqual(context.userName, 'Shivanand');
+      assert.strictEqual(context.focusSkill.id, 'communication', 'Should select lowest skill score');
+      assert.strictEqual(context.primaryWeakness?.description, 'Excessive hesitation');
+      assert.ok(context.currentOverallLevel >= 1.0);
+    });
+  });
+
+  describe('RealityModeEngine', () => {
+    it('generates domain-specific real-world missions with anti-goals', () => {
+      const salesMission = RealityModeEngine.generateMission('negotiation');
+      assert.ok(salesMission.id);
+      assert.ok(salesMission.title);
+      assert.ok(salesMission.realWorldScenario);
+      assert.ok(salesMission.concreteObjective);
+      assert.ok(salesMission.antiGoal.includes('Sorry'));
+
+      const commMission = RealityModeEngine.generateMission('communication');
+      assert.ok(commMission.antiGoal.includes('filler words'));
     });
   });
 });

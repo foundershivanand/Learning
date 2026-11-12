@@ -11,5 +11,8 @@ crons = ["30 0 * * *"]
 ENVIRONMENT = "production"
 DEFAULT_TIMEZONE = "Asia/Kolkata"
 TURSO_DATABASE_URL = "libsql://learning-sh15aa.aws-ap-south-1.turso.io"
-TURSO_AUTH_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIyMjg2ODUsImlkIjoiMDFhMTQ5MjctMWYwMS03NjMyLTgwMmMtMjMzM2RiZjE2MzY5Iiwia2lkIjoiWF9DMjR2aUQyM3BtWUR2U2MzWUh5RjdIVkc5dW5qb01rVFV5Z3ItaGZtWSIsInJpZCI6ImUzOGQyYjYzLWUyNzQtNGJhYi05M2FkLWFiOWYzYWI0MzhiYSJ9.Qc3rDENAVJpMN-vzGk0Au0XGsejKjJXYJ47uiQIfxRE-6ISTzn4hrf-7sMMSEnz-CDBb7AHnAmGnUqC9cSF3Cg"
-GROQ_API_KEY = "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"
+# Sensitive credentials (TURSO_AUTH_TOKEN, GROQ_API_KEY, TELEGRAM_BOT_TOKEN, AUTH_SECRET)
+# must be configured via Cloudflare encrypted secrets:
+# `wrangler secret put TURSO_AUTH_TOKEN`
+# `wrangler secret put GROQ_API_KEY`
+# For local development, wrangler dev automatically reads from .dev.vars

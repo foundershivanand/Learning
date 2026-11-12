@@ -3,10 +3,14 @@ import assert from 'node:assert';
 import { TursoMentorStore } from './turso-store';
 
 const TURSO_URL = process.env.TURSO_DATABASE_URL || 'libsql://learning-sh15aa.aws-ap-south-1.turso.io';
-const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIyMjg2ODUsImlkIjoiMDFhMTQ5MjctMWYwMS03NjMyLTgwMmMtMjMzM2RiZjE2MzY5Iiwia2lkIjoiWF9DMjR2aUQyM3BtWUR2U2MzWUh5RjdIVkc5dW5qb01rVFV5Z3ItaGZtWSIsInJpZCI6ImUzOGQyYjYzLWUyNzQtNGJhYi05M2FkLWFiOWYzYWI0MzhiYSJ9.Qc3rDENAVJpMN-vzGk0Au0XGsejKjJXYJ47uiQIfxRE-6ISTzn4hrf-7sMMSEnz-CDBb7AHnAmGnUqC9cSF3Cg';
+const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;
 
 describe('Turso Database Store Integration', () => {
   it('connects to Turso and loads profile and skills overview', async () => {
+    if (!TURSO_AUTH_TOKEN) {
+      console.warn('Skipping Turso network integration test: TURSO_AUTH_TOKEN not set in environment');
+      return;
+    }
     const store = new TursoMentorStore(TURSO_URL, TURSO_AUTH_TOKEN);
     const profile = await store.getProfile();
     assert.ok(profile);

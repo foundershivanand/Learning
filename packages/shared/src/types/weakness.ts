@@ -28,6 +28,7 @@ export type DebtReason =
 export interface TrainingDebtItem {
   id: string;
   weaknessId?: string;
+  targetWeaknessId?: string;
   dimensionId?: string;
   points: number;
   reason: DebtReason;

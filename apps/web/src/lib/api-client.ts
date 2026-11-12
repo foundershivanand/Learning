@@ -10,11 +10,25 @@ import {
 } from '@personal-mentor/shared';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const AUTH_SECRET = process.env.AUTH_SECRET || process.env.NEXT_PUBLIC_AUTH_SECRET || '';
+
+function getAuthHeaders(contentType = false): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (contentType) {
+    headers['Content-Type'] = 'application/json';
+  }
+  if (AUTH_SECRET) {
+    headers['Authorization'] = `Bearer ${AUTH_SECRET}`;
+  }
+  return headers;
+}
 
 export class ApiClient {
   public static async getToday(): Promise<TodayDashboardResponse> {
     try {
-      const res = await fetch(`${API_BASE}/api/today`);
+      const res = await fetch(`${API_BASE}/api/today`, {
+        headers: getAuthHeaders(),
+      });
       if (res.ok) return await res.json();
     } catch (e) {
       console.warn('API unavailable, loading local baseline state', e);
@@ -25,7 +39,9 @@ export class ApiClient {
   public static async getNextChallenge(skillId?: string): Promise<Challenge> {
     try {
       const url = skillId ? `${API_BASE}/api/challenge/next?skill=${encodeURIComponent(skillId)}` : `${API_BASE}/api/challenge/next`;
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: getAuthHeaders(),
+      });
       if (res.ok) return await res.json();
     } catch (e) {
       console.warn('API unavailable, returning local challenge template', e);
@@ -63,7 +79,7 @@ export class ApiClient {
     try {
       const res = await fetch(`${API_BASE}/api/challenge/submit`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(true),
         body: JSON.stringify(payload),
       });
       if (res.ok) return await res.json();
@@ -129,7 +145,7 @@ export class ApiClient {
     try {
       const res = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({ messages }),
       });
       if (res.ok) {
@@ -144,7 +160,10 @@ export class ApiClient {
 
   public static async getRealityMission(): Promise<RealityMission> {
     try {
-      const res = await fetch(`${API_BASE}/api/reality/mission`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/api/reality/mission`, {
+        method: 'POST',
+        headers: getAuthHeaders(true),
+      });
       if (res.ok) return await res.json();
     } catch (e) {}
 

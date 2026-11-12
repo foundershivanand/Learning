@@ -86,7 +86,30 @@ describe('mentor-api Cloudflare Worker Endpoints', () => {
     assert.strictEqual(tgRes.status, 200);
     const tgData = await tgRes.json() as any;
     assert.strictEqual(tgData.ok, true);
+    assert.strictEqual(tgData.method, 'sendMessage');
+    assert.strictEqual(tgData.chat_id, 999);
     assert.ok(tgData.replyText.includes('TODAY'));
+
+    // Test /train command
+    const trainReq = new Request('http://localhost/api/telegram/webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        update_id: 123457,
+        message: {
+          message_id: 2,
+          from: { id: 999, first_name: 'Founder' },
+          chat: { id: 999, type: 'private' },
+          date: Date.now(),
+          text: '/train',
+        },
+      }),
+    });
+    const trainRes = await worker.fetch(trainReq, {}, {});
+    assert.strictEqual(trainRes.status, 200);
+    const trainData = await trainRes.json() as any;
+    assert.strictEqual(trainData.method, 'sendMessage');
+    assert.ok(trainData.replyText.includes('NEXT PRACTICE CHALLENGE'));
   });
 
   it('GET /api/challenge/next?skill=spanish returns a high-stakes Spanish challenge', async () => {
@@ -99,5 +122,60 @@ describe('mentor-api Cloudflare Worker Endpoints', () => {
     assert.ok(challenge.title);
     assert.ok(challenge.instructions);
     assert.ok(challenge.constraints.length >= 2);
+  });
+
+  it('enforces AUTH_SECRET on protected API endpoints when configured', async () => {
+    const mockEnv = { AUTH_SECRET: 'test-secret-token-123' };
+
+    // Request without token -> 401
+    const unauthReq = new Request('http://localhost/api/today', { method: 'GET' });
+    const unauthRes = await worker.fetch(unauthReq, mockEnv, {});
+    assert.strictEqual(unauthRes.status, 401);
+
+    // Request with invalid token -> 401
+    const badTokenReq = new Request('http://localhost/api/today', {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer wrong-token' },
+    });
+    const badTokenRes = await worker.fetch(badTokenReq, mockEnv, {});
+    assert.strictEqual(badTokenRes.status, 401);
+
+    // Request with valid token -> 200
+    const authReq = new Request('http://localhost/api/today', {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer test-secret-token-123' },
+    });
+    const authRes = await worker.fetch(authReq, mockEnv, {});
+    assert.strictEqual(authRes.status, 200);
+
+    // /api/health remains public even when AUTH_SECRET is set
+    const healthReq = new Request('http://localhost/api/health', { method: 'GET' });
+    const healthRes = await worker.fetch(healthReq, mockEnv, {});
+    assert.strictEqual(healthRes.status, 200);
+  });
+
+  it('enforces TELEGRAM_WEBHOOK_SECRET verification when configured', async () => {
+    const mockEnv = { TELEGRAM_WEBHOOK_SECRET: 'tg-secret-123' };
+
+    // Request without secret header -> 401
+    const unauthReq = new Request('http://localhost/api/telegram/webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: { text: '/today' } }),
+    });
+    const unauthRes = await worker.fetch(unauthReq, mockEnv, {});
+    assert.strictEqual(unauthRes.status, 401);
+
+    // Request with valid secret header -> 200
+    const authReq = new Request('http://localhost/api/telegram/webhook', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Telegram-Bot-Api-Secret-Token': 'tg-secret-123',
+      },
+      body: JSON.stringify({ message: { text: '/today' } }),
+    });
+    const authRes = await worker.fetch(authReq, mockEnv, {});
+    assert.strictEqual(authRes.status, 200);
   });
 });

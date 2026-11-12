@@ -39,7 +39,7 @@ export function DesktopSidebar({
   const navItems = [
     { id: 'home', label: 'Overview', icon: Home, desc: "Today's Briefing" },
     { id: 'train', label: 'Practice Arena', icon: Zap, desc: 'Deliberate Drills', badge: debtPoints > 0 ? `${debtPoints}` : undefined },
-    { id: 'skills', label: '15 Skills Matrix', icon: Layers, desc: 'Mastery Breakdown' },
+    { id: 'skills', label: '16 Skills Matrix', icon: Layers, desc: 'Mastery Breakdown' },
     { id: 'progress', label: 'Progress & Debt', icon: BarChart3, desc: 'Remediation Ledger' },
     { id: 'mentor', label: 'Mentor Sparring', icon: MessageSquare, desc: 'Socratic Debrief' },
   ];
