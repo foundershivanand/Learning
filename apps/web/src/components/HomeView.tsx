@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Award,
   Zap,
-  Clock
+  Clock,
+  Globe
 } from 'lucide-react';
 import { TodayDashboardResponse, RealityMission } from '@personal-mentor/shared';
 
@@ -23,6 +24,7 @@ interface HomeViewProps {
   onStartTraining: () => void;
   onOpenSkills: () => void;
   onOpenReality: () => void;
+  onOpenAllLinks?: () => void;
 }
 
 export function HomeView({
@@ -31,6 +33,7 @@ export function HomeView({
   onStartTraining,
   onOpenSkills,
   onOpenReality,
+  onOpenAllLinks,
 }: HomeViewProps) {
   const { profile, dailyPlan, gamification, trainingDebt, primaryWeakness, skillsOverview } = data;
   const avgLevelNum = skillsOverview && skillsOverview.length > 0
@@ -233,6 +236,36 @@ export function HomeView({
           </div>
         </div>
       </div>
+
+      {/* Ecosystem All Links Banner */}
+      {onOpenAllLinks && (
+        <div className="bg-gradient-to-r from-[#121520] via-mentor-surface to-[#161a27] border border-mentor-border rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-mentor-accent/10 border border-mentor-accent/30 flex items-center justify-center text-mentor-accent shrink-0">
+              <Globe size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white">Ecosystem Tools & Product Factories</h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#1c1407] text-mentor-accent border border-amber-900/60">
+                  8 Connected Apps
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Instant access to Project Manager, Reusable Components, LaunchPilot, Finder, SkillForge, Content OS, Second Brain &amp; Setup Factory.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenAllLinks}
+            className="px-4 py-2.5 rounded-xl bg-mentor-accent hover:brightness-110 active:scale-[0.98] text-black font-extrabold text-xs transition flex items-center gap-2 shrink-0 shadow-sm"
+          >
+            <span>View All Links</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

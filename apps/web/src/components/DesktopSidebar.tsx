@@ -11,7 +11,9 @@ import {
   AlertTriangle, 
   ShieldAlert, 
   Award,
-  Play
+  Play,
+  Globe,
+  ArrowUpRight
 } from 'lucide-react';
 import { TabType } from './Navigation';
 
@@ -24,6 +26,7 @@ interface DesktopSidebarProps {
   overallLevel: number;
   userName: string;
   onStartTraining: () => void;
+  onOpenAllLinks?: () => void;
 }
 
 export function DesktopSidebar({
@@ -35,6 +38,7 @@ export function DesktopSidebar({
   overallLevel,
   userName,
   onStartTraining,
+  onOpenAllLinks,
 }: DesktopSidebarProps) {
   const navItems = [
     { id: 'home', label: 'Overview', icon: Home, desc: "Today's Briefing" },
@@ -142,6 +146,28 @@ export function DesktopSidebar({
           );
         })}
       </nav>
+
+      {/* Ecosystem All Links Button */}
+      {onOpenAllLinks && (
+        <button
+          type="button"
+          onClick={onOpenAllLinks}
+          className="my-3 w-full py-2.5 px-3 rounded-xl bg-[#090b10] hover:bg-[#141824] border border-mentor-border/80 hover:border-mentor-accent/50 text-gray-300 hover:text-white transition-all flex items-center justify-between text-left group shadow-xs"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-mentor-accent/10 border border-mentor-accent/30 flex items-center justify-center text-mentor-accent group-hover:scale-105 transition-transform">
+              <Globe size={14} className="text-mentor-accent" />
+            </div>
+            <div>
+              <div className="text-xs font-bold leading-none text-white group-hover:text-mentor-accent transition">
+                All Links
+              </div>
+              <div className="text-[10px] text-gray-400 mt-1">8 Connected Apps</div>
+            </div>
+          </div>
+          <ArrowUpRight size={14} className="text-gray-400 group-hover:text-mentor-accent transition" />
+        </button>
+      )}
 
       {/* Bottom Accountability Footer */}
       <div className="pt-4 border-t border-mentor-border/80 text-[11px] text-gray-400 flex items-center justify-between">

@@ -8,9 +8,10 @@ import { TrainView } from '../components/TrainView';
 import { SkillsView } from '../components/SkillsView';
 import { ProgressView } from '../components/ProgressView';
 import { MentorView } from '../components/MentorView';
+import { AllLinksModal } from '../components/AllLinksModal';
 import { ApiClient } from '../lib/api-client';
 import { TodayDashboardResponse, RealityMission } from '@personal-mentor/shared';
-import { Zap, X, Compass, ShieldAlert, Flame } from 'lucide-react';
+import { Zap, X, Compass, ShieldAlert, Flame, Globe } from 'lucide-react';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('home');
@@ -18,6 +19,7 @@ export default function App() {
   const [dashboardData, setDashboardData] = useState<TodayDashboardResponse | null>(null);
   const [realityMission, setRealityMission] = useState<RealityMission | null>(null);
   const [showRealityModal, setShowRealityModal] = useState(false);
+  const [showAllLinksModal, setShowAllLinksModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,10 +64,36 @@ export default function App() {
         overallLevel={overallLevel > 1.0 ? overallLevel : 1.1}
         userName={dashboardData.profile.name}
         onStartTraining={() => setCurrentTab('train')}
+        onOpenAllLinks={() => setShowAllLinksModal(true)}
       />
 
       {/* Main Content Area (Expansive for desktop, mobile-scrollable) */}
       <main className="md:pl-64 lg:pl-72 flex-1 w-full min-h-screen bg-mentor-bg flex flex-col">
+        {/* Mobile Top Header Bar */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-mentor-border/80 bg-mentor-surface/90 backdrop-blur-md sticky top-0 z-30">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-mentor-accent to-amber-600 flex items-center justify-center text-black font-black">
+              <Zap size={15} className="fill-black" />
+            </div>
+            <div>
+              <span className="text-xs font-black tracking-wider text-white uppercase">AI MENTOR</span>
+              <span className="text-[9px] ml-1.5 text-mentor-accent font-bold">OS</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAllLinksModal(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#12141c] hover:bg-[#1a1e2b] border border-mentor-border text-xs font-bold text-gray-200 transition"
+          >
+            <Globe size={13} className="text-mentor-accent" />
+            <span>All Links</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono bg-mentor-accent/20 text-mentor-accent font-bold">
+              8
+            </span>
+          </button>
+        </div>
+
         {/* Top Desktop Bar */}
         <header className="hidden md:flex items-center justify-between px-8 py-5 border-b border-mentor-border/60 bg-mentor-surface/40 backdrop-blur-sm sticky top-0 z-30">
           <div>
@@ -80,6 +108,20 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* All Links Button */}
+            <button
+              type="button"
+              onClick={() => setShowAllLinksModal(true)}
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-mentor-surface hover:bg-[#181c28] border border-mentor-border hover:border-mentor-accent/50 text-xs font-bold text-gray-200 transition-all shadow-sm group"
+              title="View All Connected Ecosystem Platforms"
+            >
+              <Globe size={14} className="text-mentor-accent group-hover:rotate-12 transition-transform" />
+              <span>All Links</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-[#1c1407] text-mentor-accent border border-amber-900/60">
+                8
+              </span>
+            </button>
+
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-mentor-surface border border-mentor-border text-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span className="text-gray-300 font-semibold">Engine: Deterministic Math</span>
@@ -100,6 +142,7 @@ export default function App() {
               onStartTraining={() => setCurrentTab('train')}
               onOpenSkills={() => setCurrentTab('skills')}
               onOpenReality={() => setShowRealityModal(true)}
+              onOpenAllLinks={() => setShowAllLinksModal(true)}
             />
           )}
 
@@ -183,6 +226,12 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* Ecosystem All Links Modal Popup */}
+        <AllLinksModal
+          isOpen={showAllLinksModal}
+          onClose={() => setShowAllLinksModal(false)}
+        />
 
         {/* Mobile-Only Bottom Navigation */}
         <Navigation
